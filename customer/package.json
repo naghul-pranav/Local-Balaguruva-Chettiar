@@ -1,0 +1,79 @@
+{
+  "name": "Balaguruva_Chettiar",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@radix-ui/react-label": "^2.1.1",
+    "@radix-ui/react-slot": "^1.1.1",
+    "@react-three/drei": "^9.121.5",
+    "@react-three/fiber": "^8.17.14",
+    "axios": "^1.8.3",
+    "bcrypt": "^5.1.1",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "cra-template": "1.2.0",
+    "emoji-picker-react": "^4.12.2",
+    "express": "^5.1.0",
+    "framer-motion": "^10.18.0",
+    "i18next": "^24.2.2",
+    "jsonwebtoken": "^9.0.2",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.8.4",
+    "lucide-react": "^0.279.0",
+    "mongoose": "^8.13.1",
+    "natural": "^8.0.1",
+    "next": "^15.1.6",
+    "nodemailer": "^7.0.3",
+    "qrcode.react": "^4.2.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-error-boundary": "^5.0.0",
+    "react-feather": "^2.0.10",
+    "react-hot-toast": "^2.5.2",
+    "react-hover-animation": "^2.1.1",
+    "react-i18next": "^15.4.1",
+    "react-icons": "^4.12.0",
+    "react-infinite-scroll-component": "^6.1.0",
+    "react-intersection-observer": "^9.15.1",
+    "react-parallax-tilt": "^1.7.284",
+    "react-responsive-carousel": "^3.2.23",
+    "react-router-dom": "^6.18.0",
+    "react-scripts": "5.0.1",
+    "react-tooltip": "^5.28.0",
+    "react-typing-effect": "^2.0.5",
+    "react-virtuoso": "^4.12.5",
+    "styled-components": "^6.1.15",
+    "three": "^0.173.0",
+    "web-vitals": "^4.2.4",
+    "wink-sentiment": "^5.0.2"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^3.4.17"
+  }
+}
