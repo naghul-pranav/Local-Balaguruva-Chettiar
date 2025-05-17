@@ -47,7 +47,7 @@ const ProductPage = ({ addToCart, isAuthenticated }) => {
   const [wishlistLoading, setWishlistLoading] = useState(false);
   const [wishlistError, setWishlistError] = useState(null);
   const navigate = useNavigate();
-
+const timeoutRef = React.useRef(null);
   const API_URL = "https://final-balaguruva-chettiar-ecommerce.onrender.com";
 
   useEffect(() => {
@@ -84,63 +84,74 @@ const ProductPage = ({ addToCart, isAuthenticated }) => {
   }, [isAuthenticated]);
 
   const confirmAddToCart = async () => {
-    if (quantity > 0 && selectedProduct) {
-      try {
-        const user = JSON.parse(localStorage.getItem("user"));
-        const token = localStorage.getItem("token");
-        if (!user?.email || !token) {
-          setCartError("Please log in to add to cart");
-          return;
-        }
-
-        const productId = selectedProduct.id;
-        if (!productId || !/^[0-9a-fA-F]{24}$/.test(productId)) {
-          setCartError("Invalid product ID");
-          console.error("Invalid product ID:", productId, "Selected Product:", selectedProduct);
-          return;
-        }
-
-        if (quantity > selectedProduct.stock) {
-          setCartError(`Only ${selectedProduct.stock} units available`);
-          setTimeout(() => setCartError(""), 3000);
-          return;
-        }
-
-        const payload = {
-          userId: user.email,
-          product: {
-            productId,
-            name: selectedProduct.name,
-            image: selectedProduct.image,
-            mrp: selectedProduct.mrp,
-            discountedPrice: selectedProduct.discountedPrice,
-            quantity,
-          },
-        };
-        console.log("Sending to /api/cart/add:", payload);
-
-        const response = await axios.post(
-          `${API_URL}/api/cart/add`,
-          payload,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
-        console.log("🛒 Backend cart updated:", response.data);
-        setCartSuccess("Item added to cart successfully!");
-        setTimeout(() => setCartSuccess(""), 3000);
-        setShowModal(false);
-        setQuantity(1);
-        setCartError("");
-      } catch (error) {
-        const errorMessage = error.response?.data?.message || "Failed to add to cart";
-        setCartError(errorMessage);
-        console.error("Failed to sync cart to backend:", error);
-        setTimeout(() => setCartError(""), 3000);
+  if (quantity > 0 && selectedProduct) {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+      const token = localStorage.getItem("token");
+      if (!user?.email || !token) {
+        setCartError("Please log in to add to cart");
+        return;
       }
+
+      const productId = selectedProduct.id;
+      if (!productId || !/^[0-9a-fA-F]{24}$/.test(productId)) {
+        setCartError("Invalid product ID");
+        console.error("Invalid product ID:", productId, "Selected Product:", selectedProduct);
+        return;
+      }
+
+      if (quantity > selectedProduct.stock) {
+        setCartError(`Only ${selectedProduct.stock} units available`);
+        setTimeout(() => setCartError(""), 3000);
+        return;
+      }
+
+      const payload = {
+        userId: user.email,
+        product: {
+          productId,
+          name: selectedProduct.name,
+          image: selectedProduct.image,
+          mrp: selectedProduct.mrp,
+          discountedPrice: selectedProduct.discountedPrice,
+          quantity,
+        },
+      };
+      console.log("Sending to /api/cart/add:", payload);
+
+      const response = await axios.post(
+        `${API_URL}/api/cart/add`,
+        payload,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      console.log("🛒 Backend cart updated:", response.data);
+      
+      // Clear any existing timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+
+      // Set success message and delay modal closure
+      setCartSuccess("Item added to cart successfully!");
+      setCartError("");
+      
+      // Automatically close modal after 3 seconds
+      timeoutRef.current = setTimeout(() => {
+        setShowModal(false);
+        setCartSuccess("");
+        setQuantity(1);
+      }, 3000);
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "Failed to add to cart";
+      setCartError(errorMessage);
+      console.error("Failed to sync cart to backend:", error);
+      setTimeout(() => setCartError(""), 3000);
     }
-  };
+  }
+};
 
   const handleImageError = (productId) => {
     setImageError(prev => ({
@@ -225,7 +236,13 @@ const ProductPage = ({ addToCart, isAuthenticated }) => {
       setWishlistLoading(false);
     }
   };
-
+  useEffect(() => {
+  return () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+  };
+}, []);
   const toggleWishlist = async (e, product) => {
   e.stopPropagation();
 
@@ -753,17 +770,20 @@ const ProductPage = ({ addToCart, isAuthenticated }) => {
               </div>
               <div className="flex justify-end gap-4">
                 <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => {
-                    setShowModal(false);
-                    setCartError("");
-                    setCartSuccess("");
-                  }}
-                  className="bg-gray-500 text-white px-6 py-3 rounded-xl hover:bg-gray-600 transition-all duration-300 hover:shadow-lg"
-                >
-                  Cancel
-                </motion.button>
+  whileHover={{ scale: 1.05 }}
+  whileTap={{ scale: 0.95 }}
+  onClick={() => {
+    setShowModal(false);
+    setCartError("");
+    setCartSuccess("");
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+  }}
+  className="bg-gray-500 text-white px-6 py-3 rounded-xl hover:bg-gray-600 transition-all duration-300 hover:shadow-lg"
+>
+  Cancel
+</motion.button>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}

@@ -26,7 +26,8 @@ const UserProfile = () => {
   const [deleteError, setDeleteError] = useState("");
   const [exporting, setExporting] = useState(false);
   const [showClearWishlistModal, setShowClearWishlistModal] = useState(false);
-
+  const [wishlistSuccess, setWishlistSuccess] = useState({}); // Tracks success messages by productId
+const wishlistTimeoutRef = React.useRef({}); // Stores timeout IDs by productId
   // Orders state
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
@@ -214,70 +215,90 @@ const UserProfile = () => {
   };
 
   const addToCart = async (item) => {
-    try {
-      const user = JSON.parse(localStorage.getItem("user"));
-      const token = localStorage.getItem("token");
-      if (!user?.email || !token) {
-        setError("Please log in to add to cart");
-        console.error("❌ Missing user email or token");
-        return;
-      }
-
-      // Log full item for debugging
-      console.log("Wishlist item:", item);
-
-      // Try id, _id, or productId
-      const productId = item.id || item._id || item.productId;
-      if (!productId) {
-        setError("Invalid product ID");
-        console.error("❌ Missing product ID in item:", item);
-        return;
-      }
-
-      // Validate product availability
-      try {
-        await axios.get(`${API_URL}/api/products/${productId}`);
-      } catch (error) {
-        // Product not found, remove from wishlist
-        await axios.delete(`${API_URL}/api/user/wishlist/${productId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setWishlist(wishlist.filter(w => w.productId !== productId));
-        setError({ type: "error", message: "Product not available anymore and has been removed from your wishlist." });
-        setTimeout(() => setError(null), 3000);
-        return;
-      }
-
-      const payload = {
-        userId: user.email,
-        product: {
-          productId: productId,
-          name: item.name || "Unknown Product",
-          image: item.image || "",
-          mrp: item.mrp ?? item.price ?? 0,
-          discountedPrice: item.discountedPrice ?? item.price ?? 0,
-          quantity: item.quantity || 1,
-        },
-      };
-      console.log("Sending to /api/cart/add from wishlist:", payload);
-
-      const response = await axios.post(
-        `${API_URL}/api/cart/add`,
-        payload,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      console.log("🛒 Added to cart:", response.data);
-      setError({ type: "success", message: "Item added to cart successfully!" });
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const token = localStorage.getItem("token");
+    if (!user?.email || !token) {
+      setError({ type: "error", message: "Please log in to add to cart" });
+      console.error("❌ Missing user email or token");
       setTimeout(() => setError(null), 3000);
-    } catch (error) {
-      const errorMessage = error.response?.data?.message || "Failed to add to cart";
-      setError({ type: "error", message: errorMessage });
-      console.error("❌ Failed to add to cart from wishlist:", error.message, error.response?.data);
-      setTimeout(() => setError(null), 3000);
+      return;
     }
-  };
 
+    // Log full item for debugging
+    console.log("Wishlist item:", item);
+
+    // Try id, _id, or productId
+    const productId = item.id || item._id || item.productId;
+    if (!productId) {
+      setError({ type: "error", message: "Invalid product ID" });
+      console.error("❌ Missing product ID in item:", item);
+      setTimeout(() => setError(null), 3000);
+      return;
+    }
+
+    // Validate product availability
+    try {
+      await axios.get(`${API_URL}/api/products/${productId}`);
+    } catch (error) {
+      // Product not found, remove from wishlist
+      await axios.delete(`${API_URL}/api/user/wishlist/${productId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setWishlist(wishlist.filter(w => w.productId !== productId));
+      setError({ type: "error", message: "Product not available anymore and has been removed from your wishlist." });
+      setTimeout(() => setError(null), 3000);
+      return;
+    }
+
+    const payload = {
+      userId: user.email,
+      product: {
+        productId: productId,
+        name: item.name || "Unknown Product",
+        image: item.image || "",
+        mrp: item.mrp ?? item.price ?? 0,
+        discountedPrice: item.discountedPrice ?? item.price ?? 0,
+        quantity: item.quantity || 1,
+      },
+    };
+    console.log("Sending to /api/cart/add from wishlist:", payload);
+
+    const response = await axios.post(
+      `${API_URL}/api/cart/add`,
+      payload,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    console.log("🛒 Added to cart:", response.data);
+    
+    // Clear any existing timeout for this productId
+    if (wishlistTimeoutRef.current[productId]) {
+      clearTimeout(wishlistTimeoutRef.current[productId]);
+    }
+
+    // Set success message for this product
+    setWishlistSuccess(prev => ({
+      ...prev,
+      [productId]: "Added to cart successfully!"
+    }));
+
+    // Clear the success message after 3 seconds
+    wishlistTimeoutRef.current[productId] = setTimeout(() => {
+      setWishlistSuccess(prev => {
+        const newState = { ...prev };
+        delete newState[productId];
+        return newState;
+      });
+      delete wishlistTimeoutRef.current[productId];
+    }, 3000);
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || "Failed to add to cart";
+    setError({ type: "error", message: errorMessage });
+    console.error("❌ Failed to add to cart from wishlist:", error.message, error.response?.data);
+    setTimeout(() => setError(null), 3000);
+  }
+};
   const clearWishlist = async () => {
     // Remove the direct use of confirm() and use modal instead
     setShowClearWishlistModal(true);
@@ -313,7 +334,15 @@ const UserProfile = () => {
     fetchUserOrders();
     fetchWishlist();
   }, []);
-
+  useEffect(() => {
+  return () => {
+    // Clear all timeouts when component unmounts
+    Object.values(wishlistTimeoutRef.current).forEach(timeoutId => {
+      if (timeoutId) clearTimeout(timeoutId);
+    });
+    wishlistTimeoutRef.current = {};
+  };
+}, []);
   const handleEditToggle = () => {
     setEditMode(!editMode);
     if (editMode) {
@@ -883,64 +912,71 @@ const UserProfile = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {wishlist.map((item) => (
-            <div
-              key={item.productId}
-              className="border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow p-4 flex flex-col"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs text-gray-500">
-                  Added {new Date(item.addedAt).toLocaleDateString()}
-                </span>
-                <button
-                  onClick={() => removeFromWishlist(item.productId)}
-                  className="text-red-500 hover:text-red-700"
-                  title="Remove from wishlist"
-                >
-                  <FaTimes />
-                </button>
-              </div>
+  <div
+    key={item.productId}
+    className="border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow p-4 flex flex-col"
+  >
+    <div className="flex items-center justify-between mb-3">
+      <span className="text-xs text-gray-500">
+        Added {new Date(item.addedAt).toLocaleDateString()}
+      </span>
+      <button
+        onClick={() => removeFromWishlist(item.productId)}
+        className="text-red-500 hover:text-red-700"
+        title="Remove from wishlist"
+      >
+        <FaTimes />
+      </button>
+    </div>
 
-              <div className="flex items-center mb-3">
-                {item.image ? (
-                  <img
-                    src={item.image?.startsWith("data:image")
-                      ? item.image
-                      : `data:image/jpeg;base64,${item.image}`}
-                    alt={item.name}
-                    className="w-16 h-16 object-cover rounded mr-3"
-                  />
-                ) : (
-                  <div className="w-16 h-16 bg-gray-200 rounded flex items-center justify-center mr-3">
-                    <FaHeart className="text-gray-400" />
-                  </div>
-                )}
+    <div className="flex items-center mb-3">
+      {item.image ? (
+        <img
+          src={item.image?.startsWith("data:image")
+            ? item.image
+            : `data:image/jpeg;base64,${item.image}`}
+          alt={item.name}
+          className="w-16 h-16 object-cover rounded mr-3"
+        />
+      ) : (
+        <div className="w-16 h-16 bg-gray-200 rounded flex items-center justify-center mr-3">
+          <FaHeart className="text-gray-400" />
+        </div>
+      )}
 
-                <div className="flex-1">
-                  <h4 className="font-medium text-gray-800 mb-1 line-clamp-1">{item.name}</h4>
-                  <p className="text-blue-600 font-bold">₹{item.price.toFixed(2)}</p>
-                </div>
-              </div>
+      <div className="flex-1">
+        <h4 className="font-medium text-gray-800 mb-1 line-clamp-1">{item.name}</h4>
+        <p className="text-blue-600 font-bold">₹{item.price.toFixed(2)}</p>
+      </div>
+    </div>
 
-              {item.description && (
-                <p className="text-sm text-gray-600 mb-3 line-clamp-2">{item.description}</p>
-              )}
+    {item.description && (
+      <p className="text-sm text-gray-600 mb-3 line-clamp-2">{item.description}</p>
+    )}
 
-              {item.category && (
-                <div className="mb-3">
-                  <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
-                    {item.category}
-                  </span>
-                </div>
-              )}
+    {item.category && (
+      <div className="mb-3">
+        <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
+          {item.category}
+        </span>
+      </div>
+    )}
 
-              <button
-                onClick={() => addToCart(item)}
-                className="mt-auto bg-gradient-to-r from-blue-500 to-teal-500 text-white px-4 py-2 rounded hover:from-blue-600 hover:to-teal-600 transition-colors flex items-center justify-center"
-              >
-                <FaCartPlus className="mr-2" /> Add to Cart
-              </button>
-            </div>
-          ))}
+    {wishlistSuccess[item.productId] ? (
+      <div className="mt-2 bg-green-50 border-l-4 border-green-500 p-2 text-green-700 text-sm flex items-center">
+        <FaCheck className="mr-2" />
+        {wishlistSuccess[item.productId]}
+      </div>
+    ) : (
+      <button
+        onClick={() => addToCart(item)}
+        className="mt-auto bg-gradient-to-r from-blue-500 to-teal-500 text-white px-4 py-2 rounded hover:from-blue-600 hover:to-teal-600 transition-colors flex items-center justify-center"
+      >
+        <FaCartPlus className="mr-2" /> Add to Cart
+      </button>
+    )}
+  </div>
+))}
         </div>
       )}
     </motion.div>

@@ -37,7 +37,7 @@ const CartPage = ({ removeFromCart, isLoading, user }) => {
   const [paymentMethod, setPaymentMethod] = useState("razorpay");
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [error, setError] = useState("");
-
+  const [isFetching, setIsFetching] = useState(true);
   const [shippingInfo, setShippingInfo] = useState({
     fullName: user?.name || "",
     addressLine1: user?.address || "",
@@ -151,67 +151,71 @@ const CartPage = ({ removeFromCart, isLoading, user }) => {
   }, []);
 
   useEffect(() => {
-    const fetchCartAndProducts = async () => {
-      const user = JSON.parse(localStorage.getItem("user"));
-      if (!user?.email) {
-        console.log("No user email found, skipping cart fetch");
-        setCart([]);
-        return;
-      }
-      try {
-        const token = localStorage.getItem("token");
-        const cartRes = await axios.get(`https://final-balaguruva-chettiar-ecommerce.onrender.com/api/cart/${user.email}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const cartData = cartRes.data;
-        console.log("🛒 Cart from backend:", cartData);
+  const fetchCartAndProducts = async () => {
+    setIsFetching(true); // Start fetching
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user?.email) {
+      console.log("No user email found, skipping cart fetch");
+      setCart([]);
+      setIsFetching(false); // Done fetching
+      return;
+    }
+    try {
+      const token = localStorage.getItem("token");
+      const cartRes = await axios.get(`https://final-balaguruva-chettiar-ecommerce.onrender.com/api/cart/${user.email}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const cartData = cartRes.data;
+      console.log("🛒 Cart from backend:", cartData);
 
-        const productsRes = await axios.get("https://final-balaguruva-chettiar-ecommerce.onrender.com/api/products");
-        const products = productsRes.data;
-        setAllProducts(products);
-        console.log("📦 All products:", products);
+      const productsRes = await axios.get("https://final-balaguruva-chettiar-ecommerce.onrender.com/api/products");
+      const products = productsRes.data;
+      setAllProducts(products);
+      console.log("📦 All products:", products);
 
-        const enrichedCart = (cartData.items || [])
-          .map((item) => {
-            const product = products.find(
-              (p) => String(p._id) === String(item.productId) || String(p.id) === String(item.productId)
-            );
-            if (!product) {
-              console.warn("❌ Product not found for productId:", item.productId);
-              return null;
-            }
+      const enrichedCart = (cartData.items || [])
+        .map((item) => {
+          const product = products.find(
+            (p) => String(p._id) === String(item.productId) || String(p.id) === String(item.productId)
+          );
+          if (!product) {
+            console.warn("❌ Product not found for productId:", item.productId);
+            return null;
+          }
 
-            return {
-              productId: item.productId,
-              name: product.name,
-              image: item.image || product.image || "",
-              mrp: product.mrp,
-              discountedPrice: product.discountedPrice,
-              quantity: item.quantity,
-            };
-          })
-          .filter((item) => item !== null);
+          return {
+            productId: item.productId,
+            name: product.name,
+            image: item.image || product.image || "",
+            mrp: product.mrp,
+            discountedPrice: product.discountedPrice,
+            quantity: item.quantity,
+          };
+        })
+        .filter((item) => item !== null);
 
-        setCart(enrichedCart);
-        console.log("✅ Processed cart:", enrichedCart);
-        setError("");
-      } catch (err) {
-        const errorMessage =
-          err.response?.data?.message || err.message || "Failed to load cart or products";
-        console.error("❌ Error loading cart/products:", {
-          message: errorMessage,
-          status: err.response?.status,
-          data: err.response?.data,
-          request: err.request?.responseURL,
-          stack: err.stack,
-        });
-        setError(errorMessage);
-        setCart([]);
-      }
-    };
+      setCart(enrichedCart);
+      console.log("✅ Processed cart:", enrichedCart);
+      setError("");
+    } catch (err) {
+      const errorMessage =
+        err.response?.data?.message || err.message || "Failed to load cart or products";
+      console.error("❌ Error loading cart/products:", {
+        message: errorMessage,
+        status: err.response?.status,
+        data: err.response?.data,
+        request: err.request?.responseURL,
+        stack: err.stack,
+      });
+      setError(errorMessage);
+      setCart([]);
+    } finally {
+      setIsFetching(false); // Done fetching, regardless of success or failure
+    }
+  };
 
-    fetchCartAndProducts();
-  }, []);
+  fetchCartAndProducts();
+}, []);
 
   useEffect(() => {
     const syncCart = async () => {
@@ -253,8 +257,15 @@ const CartPage = ({ removeFromCart, isLoading, user }) => {
   }, [cart, user]);
 
   useEffect(() => {
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}, [step]);
+  // Skip scrolling on initial render or during loading
+  if (isLoading || isFetching) return;
+
+  // Only scroll if step changes after initial render
+  const isInitialRender = step === steps[0]; // "cart" is the first step
+  if (!isInitialRender) {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}, [step, isLoading, isFetching, steps]);
 
   const handleSuccessfulPayment = (order, method) => {
     console.log("Received successful payment:", { order, method }); // Debug
@@ -422,56 +433,71 @@ const CartPage = ({ removeFromCart, isLoading, user }) => {
     }
   };
 
-  if (isLoading) {
-    return (
-      <motion.div className="text-center mt-20" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+  if (isLoading || isFetching) {
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key="loading"
+        className="container mx-auto px-4 py-20 min-h-[60vh] flex flex-col items-center justify-center text-center"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.5 }}
+      >
         <motion.div
-          animate={{ rotate: 360, scale: [1, 1.2, 1], transition: { duration: 2, repeat: Infinity } }}
+          animate={{ rotate: 360, transition: { duration: 2, repeat: Infinity, ease: "linear" } }}
           className="text-6xl mx-auto text-blue-500 mb-4"
         >
           <FaSpinner />
         </motion.div>
         <motion.h2
-          animate={{ opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 2, repeat: Infinity }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
           className="text-2xl font-semibold mb-4"
         >
           Loading your cart...
         </motion.h2>
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }} className="text-gray-500">
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="text-gray-500"
+        >
           Just a moment while we prepare your items
         </motion.p>
       </motion.div>
-    );
-  }
+    </AnimatePresence>
+  );
+}
 
-  if (cart.length === 0) {
-    return (
-      <motion.div
-        variants={emptyCartVariants}
-        initial="hidden"
-        animate="visible"
-        className="container mx-auto px-4 py-20 min-h-[60vh] flex flex-col items-center justify-center"
-      >
-        <motion.div variants={floatingAnimation} animate="animate" className="mb-6 p-6 bg-blue-50 rounded-full">
-          <FaShoppingCart className="text-6xl text-blue-400" />
-        </motion.div>
-        <h2 className="text-2xl font-semibold mb-4">{t("Your cart is empty", "home")}</h2>
-        <p className="text-gray-600 mb-6 text-center max-w-md">
-          {t("Looks like you haven't added anything to your cart yet. Browse our products and find something you'll love!", "home")}
-        </p>
-        <motion.button
-  whileHover={{ scale: 1.05 }}
-  whileTap={{ scale: 0.95 }}
-  onClick={() => (window.location.href = '/products')} // Fallback if not using React Router
-  className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center space-x-2"
->
-  <FaArrowLeft />
-  <span>{t("Continue Shopping", "home")}</span>
-</motion.button>
+if (!isLoading && !isFetching && cart.length === 0) {
+  return (
+    <motion.div
+      variants={emptyCartVariants}
+      initial="hidden"
+      animate="visible"
+      className="container mx-auto px-4 py-20 min-h-[60vh] flex flex-col items-center justify-center"
+    >
+      <motion.div variants={floatingAnimation} animate="animate" className="mb-6 p-6 bg-blue-50 rounded-full">
+        <FaShoppingCart className="text-6xl text-blue-400" />
       </motion.div>
-    );
-  }
+      <h2 className="text-2xl font-semibold mb-4">{t("Your cart is empty", "home")}</h2>
+      <p className="text-gray-600 mb-6 text-center max-w-md">
+        {t("Looks like you haven't added anything to your cart yet. Browse our products and find something you'll love!", "home")}
+      </p>
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => (window.location.href = '/products')}
+        className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center space-x-2"
+      >
+        <FaArrowLeft />
+        <span>{t("Continue Shopping", "home")}</span>
+      </motion.button>
+    </motion.div>
+  );
+}
 
   const renderCartItems = () => (
     <div className={`${isMobile ? "overflow-x-auto" : ""}`}>
