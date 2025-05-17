@@ -302,37 +302,37 @@ const ProductPage = ({ addToCart, isAuthenticated }) => {
     if (!product.image || imageError[product.id]) {
       return (
         <motion.div 
-          className="w-full h-52 bg-gradient-to-br from-gray-100 to-gray-200 flex flex-col items-center justify-center rounded-lg"
-          initial={{ opacity: 0.6 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <img 
-            src={fallbackImageBase64} 
-            alt="Not available"
-            className="w-28 h-28 opacity-50"
-          />
-          <span className="text-gray-500 text-sm mt-2 font-medium">Image not available</span>
-        </motion.div>
+  className="w-full aspect-square bg-gradient-to-br from-gray-100 to-gray-200 flex flex-col items-center justify-center rounded-lg"
+  initial={{ opacity: 0.6 }}
+  animate={{ opacity: 1 }}
+  transition={{ duration: 0.5 }}
+>
+  <img 
+    src={fallbackImageBase64} 
+    alt="Not available"
+    className="w-28 h-28 opacity-50"
+  />
+  <span className="text-gray-500 text-sm mt-2 font-medium">Image not available</span>
+</motion.div>
       );
     }
 
     return (
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="relative w-full h-52 overflow-hidden rounded-t-lg"
-      >
-        <img
-          src={product.image.startsWith('data:') ? product.image : `data:image/jpeg;base64,${product.image}`}
-          alt={product.name}
-          className="w-full h-52 object-cover transition-all duration-500 hover:scale-110 group-hover:scale-110"
-          loading="lazy"
-          onError={() => handleImageError(product.id)}
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent rounded-t-lg" />
-      </motion.div>
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  className="relative w-full aspect-square overflow-hidden rounded-t-lg"
+>
+  <img
+    src={product.image.startsWith('data:') ? product.image : `data:image/jpeg;base64,${product.image}`}
+    alt={product.name}
+    className="w-full h-full object-cover transition-all duration-500 hover:scale-110 group-hover:scale-110"
+    loading="lazy"
+    onError={() => handleImageError(product.id)}
+    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+  />
+  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent rounded-t-lg" />
+</motion.div>
     );
   };
 

@@ -88,6 +88,21 @@ const translations = {
       "Copyright": "பதிப்புரிமை"
     },
     home: {
+      "Our Premium Cookware Materials": "எங்கள் உயர்தர சமையல் பாத்திரப் பொருட்கள்",
+  "Explore the benefits of our high-quality materials used in crafting traditional cookware.": "பாரம்பரிய சமையல் பாத்திரங்களை உருவாக்குவதற்குப் பயன்படுத்தப்படும் எங்கள் உயர்தரப் பொருட்களின் நன்மைகளை ஆராயுங்கள்.",
+  "Brass": "பித்தளை",
+  "Naturally enhances flavors and ensures even heat distribution for perfect cooking.": "இயற்கையாகவே சுவைகளை மேம்படுத்தி, சமமான வெப்ப விநியோகத்தை உறுதி செய்து சரியான சமையலுக்கு உதவுகிறது.",
+  "Bronze": "வெண்கலம்",
+  "Durable and resistant to corrosion, ideal for long-lasting traditional cookware.": "நீடித்து உழைக்கக்கூடிய மற்றும் அரிப்புக்கு எதிர்ப்புத் தன்மை கொண்டது, நீண்ட காலம் உழைக்கும் பாரம்பரிய சமையல் பாத்திரங்களுக்கு ஏற்றது.",
+  "Cast Iron": "வார்ப்பிரும்பு",
+  "Retains heat exceptionally well, making it perfect for slow cooking and searing.": "வெப்பத்தை மிகச் சிறப்பாகத் தக்கவைத்து, மெதுவாக சமைப்பதற்கும் பொரித்து வறுப்பதற்கும் ஏற்றது.",
+  "What Our Customers Say": "எங்கள் வாடிக்கையாளர்கள் என்ன சொல்கிறார்கள்",
+  "The copper kadai I bought is amazing! It heats evenly and makes cooking so much easier.": "நான் வாங்கிய செம்பு கடாய் அற்புதமானது! இது சமமாக வெப்பமடைகிறது மற்றும் சமையலை மிகவும் எளிதாக்குகிறது.",
+  "Priya S., Chennai": "ப்ரியா எஸ்., சென்னை",
+  "I love the brass pot from Balaguruva Chettiar. It’s perfect for traditional recipes.": "பாலகுருவா செட்டியாரிடமிருந்து வாங்கிய பித்தளை பாத்திரம் எனக்கு மிகவும் பிடிக்கும். இது பாரம்பரிய உணவு வகைகளுக்கு ஏற்றது.",
+  "Ramesh K., Coimbatore": "ரமேஷ் கே., கோயம்புத்தூர்",
+  "Excellent quality and fast delivery. The bronze uruli is a great addition to my kitchen!": "சிறந்த தரம் மற்றும் விரைவான விநியோகம். வெண்கல உருளி என் சமையலறைக்கு ஒரு சிறந்த கூடுதலாக உள்ளது!",
+  "Anitha R., Madurai": "அனிதா ஆர்., மதுரை",
       "Full Name": "முழு பெயர்",
       "Our Premium Products": "எங்கள் உயர்தர தயாரிப்புகள்",
       "Discover our collection of high-quality products designed for you": "உங்களுக்காக வடிவமைக்கப்பட்ட உயர்தர தயாரிப்புகளின் தொகுப்பைக் கண்டறியுங்கள்",
@@ -209,6 +224,8 @@ const translations = {
       "reviews": "மதிப்புரைகள்"
     },
     about: {
+      "Our success is built on the expertise and dedication of our team. From our skilled craftsmen to our innovative designers, every member of Balaguruva Chettiar Son's Co is committed to delivering excellence in every cookware utensil we produce.": "எங்கள் வெற்றி எங்கள் குழுவின் நிபுணத்துவம் மற்றும் அர்ப்பணிப்பின் மீது கட்டமைக்கப்பட்டுள்ளது. எங்கள் திறமையான கைவினைஞர்கள் முதல் புதுமையான வடிவமைப்பாளர்கள் வரை, பாலகுருவா செட்டியார் மகன்கள் நிறுவனத்தின் ஒவ்வொரு உறுப்பினரும் நாங்கள் உற்பத்தி செய்யும் ஒவ்வொரு சமையல் பாத்திரத்திலும் சிறப்பை வழங்குவதற்கு உறுதிபூண்டுள்ளனர்.",
+  "At Balaguruva Chettiar Son's Co, our mission is to preserve the art of traditional cookware craftsmanship while delivering exceptional quality to kitchens worldwide. We aim to inspire culinary creativity with cookware that lasts for generations.": "பாலகுருவா செட்டியார் மகன்கள் நிறுவனத்தில், பாரம்பரிய சமையல் பாத்திரக் கைவினைத்திறனின் கலையைப் பாதுகாக எங்கள் வெற்றி எங்கள் குழுவின் நிபுணத்துவம் மற்றும் அர்ப்பணிப்பின் மீது கட்டமைக்கப்பட்டுள்ளது. எங்கள் திறமையான கைவினைஞர்கள் முதல் புதுமையான வடிவமைப்பாளர்கள் வரை, பாலகுருவா செட்டியார் மகன்கள் நிறுவனத்தின் ஒவ்வொரு உறுப்பினரும் நாங்கள் உற்பத்தி செய்யும் ஒவ்வொரு சமையல் பாத்திரத்திலும் சிறப்பை வழங்குவதற்கு உறுதிபூண்டுள்ளனர்.",
       "About Balaguruva Chettiar Son's Co": "பாலகுருவா செட்டியார் மகன்கள் நிறுவனம் பற்றி",
       "Founded in 1992, Balaguruva Chettiar Son's Co has been at the forefront of the cookware industry for over three decades. What started as a small family-owned business has grown into a leading manufacturer of high-quality cookwares, serving customers worldwide.": "1992இல் நிறுவப்பட்ட பாலகுருவா செட்டியார் மகன்கள் நிறுவனம், மூன்று தசாப்தங்களுக்கும் மேலாக சமையல் பாத்திரத் துறையில் முன்னணியில் உள்ளது. ஒரு சிறிய குடும்பத்திற்கு சொந்தமான வணிகமாக தொடங்கியது, உலகளவில் வாடிக்கையாளர்களுக்கு சேவை செய்யும் உயர்தர சமையல் பாத்திரங்களின் முன்னணி உற்பத்தியாளராக வளர்ந்துள்ளது.",
       "At Balaguruva Chettiar Son's Co, we believe in responsible manufacturing. We're committed to reducing our environmental impact through sustainable practices, including the use of recycled materials, energy-efficient production methods, and waste reduction initiatives.": "பாலகுருவா செட்டியார் மகன்கள் நிறுவனத்தில், நாங்கள் பொறுப்பான உற்பத்தியில் நம்பிக்கை கொண்டுள்ளோம். மறுசுழற்சி செய்யப்பட்ட பொருட்களின் பயன்பாடு, ஆற்றல் திறன் கொண்ட உற்பத்தி முறைகள் மற்றும் கழிவு குறைப்பு முயற்சிகள் உள்ளிட்ட நிலையான முறைகள் மூலம் எங்கள் சுற்றுச்சூழல் தாக்கத்தை குறைப்பதற்கு நாங்கள் உறுதிபூண்டுள்ளோம்.",
