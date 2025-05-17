@@ -40,7 +40,7 @@ const UserProfile = () => {
   const [wishlistError, setWishlistError] = useState(null);
   const [activeTab, setActiveTab] = useState('orders'); // 'orders' or 'wishlist'
 
-  const API_URL = "http://localhost:5008";
+  const API_URL = "https://final-balaguruva-chettiar-ecommerce.onrender.com";
 
   const fetchUserProfile = async () => {
     setLoading(true);

@@ -27,7 +27,7 @@ const ManageProducts = () => {
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/products");
+      const res = await fetch("https://balaguruva-final-hosting.onrender.com/api/products");
       if (!res.ok) throw new Error("Failed to fetch products");
       const data = await res.json();
       setProducts(data);
@@ -39,7 +39,7 @@ const ManageProducts = () => {
 
   const fetchArchivedProducts = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/deleted-products");
+      const res = await fetch("https://balaguruva-final-hosting.onrender.com/api/deleted-products");
       if (!res.ok) throw new Error("Failed to fetch archived products");
       const data = await res.json();
       if (data.success) {
@@ -118,7 +118,7 @@ const ManageProducts = () => {
     }
 
     try {
-      const res = await fetch(`http://localhost:5000/api/products/${editingProduct}`, {
+      const res = await fetch(`https://balaguruva-final-hosting.onrender.com/api/products/${editingProduct}`, {
         method: "PUT",
         body: form,
       });
@@ -146,7 +146,7 @@ const ManageProducts = () => {
   const confirmDelete = async () => {
     setIsDeleting(true); // Set loading state to true
     try {
-      const res = await fetch(`http://localhost:5000/api/products/${productToDelete}`, {
+      const res = await fetch(`https://balaguruva-final-hosting.onrender.com/api/products/${productToDelete}`, {
         method: "DELETE",
       });
       if (res.ok) {
@@ -176,7 +176,7 @@ const ManageProducts = () => {
   const confirmRestore = async () => {
     setIsRestoring(true); // Set loading state to true
     try {
-      const res = await fetch(`http://localhost:5000/api/products/restore/${productToRestore._id}`, {
+      const res = await fetch(`https://balaguruva-final-hosting.onrender.com/api/products/restore/${productToRestore._id}`, {
         method: "POST",
       });
       if (res.ok) {

@@ -77,7 +77,7 @@ const App = () => {
     if (!user?.email) return;
   
     try {
-      const response = await axios.post("http://localhost:5008/api/cart/add", {
+      const response = await axios.post("https://final-balaguruva-chettiar-ecommerce.onrender.com/api/cart/add", {
         userId: user.email,
         product: {
           productId: product.id,

@@ -633,7 +633,7 @@ const AdminOrdersPage = () => {
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const [showAnalytics, setShowAnalytics] = useState(true);
 
-  const API_URL = "http://localhost:5000";
+  const API_URL = "https://balaguruva-final-hosting.onrender.com";
 
   // Fetch orders from the server
   const fetchOrders = async () => {

@@ -48,7 +48,7 @@ const ProductPage = ({ addToCart, isAuthenticated }) => {
   const [wishlistError, setWishlistError] = useState(null);
   const navigate = useNavigate();
 
-  const API_URL = "http://localhost:5008";
+  const API_URL = "https://final-balaguruva-chettiar-ecommerce.onrender.com";
 
   useEffect(() => {
     if (selectedProduct) {

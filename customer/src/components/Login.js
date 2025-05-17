@@ -71,7 +71,7 @@ const Login = ({ setIsAuthenticated }) => {
     setError(null);
 
     try {
-      const response = await axios.post("http://localhost:5008/login", formData);
+      const response = await axios.post("https://final-balaguruva-chettiar-ecommerce.onrender.com/login", formData);
       
       if (response.data && response.data.token) {
         // Save token and user data
@@ -137,7 +137,7 @@ const Login = ({ setIsAuthenticated }) => {
     setForgotPasswordError(null);
 
     try {
-      const response = await axios.post('http://localhost:5008/api/forgot-password', {
+      const response = await axios.post('https://final-balaguruva-chettiar-ecommerce.onrender.com/api/forgot-password', {
         email: forgotPasswordData.email
       });
       setForgotPasswordSuccess(response.data.message);
@@ -158,7 +158,7 @@ const Login = ({ setIsAuthenticated }) => {
 
     if (forgotPasswordStep === 'otp') {
       try {
-        const response = await axios.post('http://localhost:5008/api/reset-password', {
+        const response = await axios.post('https://final-balaguruva-chettiar-ecommerce.onrender.com/api/reset-password', {
           email: forgotPasswordData.email,
           otp: forgotPasswordData.otp,
           newPassword: forgotPasswordData.newPassword

@@ -20,10 +20,10 @@ export const CartProvider = ({ children }) => {
       if (!token) return;
 
       try {
-        const cartRes = await axios.get(`http://localhost:5008/api/cart/${user.email}`, {
+        const cartRes = await axios.get(`https://final-balaguruva-chettiar-ecommerce.onrender.com/api/cart/${user.email}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        const productsRes = await axios.get('http://localhost:5008/api/products', {
+        const productsRes = await axios.get('https://final-balaguruva-chettiar-ecommerce.onrender.com/api/products', {
           headers: { Authorization: `Bearer ${token}` },
         });
         const enrichedCart = cartRes.data.items
@@ -71,7 +71,7 @@ export const CartProvider = ({ children }) => {
       setTimeout(() => setAnimateCart(false), 500);
 
       await axios.post(
-        'http://localhost:5008/api/cart',
+        'https://final-balaguruva-chettiar-ecommerce.onrender.com/api/cart',
         {
           userId: user.email,
           items: [

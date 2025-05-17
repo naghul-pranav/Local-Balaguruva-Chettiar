@@ -42,7 +42,7 @@ const AddProduct = () => {
       form.append("image", formData.image);
     }
 
-    const response = await fetch("http://localhost:5000/api/products", {
+    const response = await fetch("https://balaguruva-final-hosting.onrender.com/api/products", {
       method: "POST",
       body: form,
     });

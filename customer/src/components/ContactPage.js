@@ -428,7 +428,7 @@ const ContactPage = () => {
         phone: formData.phone.replace(/[^\d]/g, '')
       };
       
-      const response = await fetch("http://localhost:5008/api/contact", {
+      const response = await fetch("https://final-balaguruva-chettiar-ecommerce.onrender.com/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(submissionData)

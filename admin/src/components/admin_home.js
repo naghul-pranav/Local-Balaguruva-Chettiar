@@ -46,7 +46,7 @@ const AdminHome = () => {
 
     const loadTasksData = async (retry = true) => {
   try {
-    const response = await fetch('http://localhost:5000/api/tasks');
+    const response = await fetch('https://balaguruva-final-hosting.onrender.com/api/tasks');
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -114,7 +114,7 @@ useEffect(() => {
 
     const loadDashboardData = async (retry = true) => {
         try {
-            const response = await fetch('http://localhost:5000/api/products');
+            const response = await fetch('https://balaguruva-final-hosting.onrender.com/api/products');
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -137,7 +137,7 @@ useEffect(() => {
 
     const loadContactsData = async (retry = true) => {
         try {
-            const response = await fetch('http://localhost:5000/api/contacts');
+            const response = await fetch('https://balaguruva-final-hosting.onrender.com/api/contacts');
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -160,7 +160,7 @@ useEffect(() => {
 
     const loadUsersData = async (retry = true) => {
         try {
-            const response = await fetch('http://localhost:5000/api/users');
+            const response = await fetch('https://balaguruva-final-hosting.onrender.com/api/users');
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -183,7 +183,7 @@ useEffect(() => {
 
     const loadOrdersData = async (retry = true) => {
         try {
-            const response = await fetch('http://localhost:5000/api/orders/admin/all');
+            const response = await fetch('https://balaguruva-final-hosting.onrender.com/api/orders/admin/all');
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -341,7 +341,7 @@ useEffect(() => {
     const task = tasks.find(t => t._id === taskId);
     if (!task) return;
 
-    const response = await fetch(`http://localhost:5000/api/tasks/${taskId}`, {
+    const response = await fetch(`https://balaguruva-final-hosting.onrender.com/api/tasks/${taskId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ completed: !task.completed }),
@@ -363,7 +363,7 @@ useEffect(() => {
 
 const deleteTask = async (taskId) => {
   try {
-    const response = await fetch(`http://localhost:5000/api/tasks/${taskId}`, {
+    const response = await fetch(`https://balaguruva-final-hosting.onrender.com/api/tasks/${taskId}`, {
       method: 'DELETE',
     });
 
@@ -389,7 +389,7 @@ const addTask = async (e) => {
   }
 
   try {
-    const response = await fetch('http://localhost:5000/api/tasks', {
+    const response = await fetch('https://balaguruva-final-hosting.onrender.com/api/tasks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

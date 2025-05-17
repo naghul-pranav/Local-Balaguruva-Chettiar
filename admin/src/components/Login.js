@@ -91,7 +91,7 @@ const Login = () => {
 
             try {
                 // Send OTP request to server
-                const response = await axios.post('http://localhost:5000/api/admin/send-otp', {
+                const response = await axios.post('https://balaguruva-final-hosting.onrender.com/api/admin/send-otp', {
                     email: formData.username
                 });
 
@@ -122,7 +122,7 @@ const Login = () => {
         setErrors({});
 
         try {
-            const response = await axios.post('http://localhost:5000/api/admin/verify-otp', {
+            const response = await axios.post('https://balaguruva-final-hosting.onrender.com/api/admin/verify-otp', {
                 email: formData.username,
                 otp
             });

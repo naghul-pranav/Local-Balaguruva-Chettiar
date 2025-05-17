@@ -16,7 +16,7 @@ const MessagesPage = () => {
     const fetchMessages = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('http://localhost:5000/api/contacts');
+        const response = await axios.get('https://balaguruva-final-hosting.onrender.com/api/contacts');
         setMessages(response.data);
         setFilteredMessages(response.data);
       } catch (err) {
@@ -68,7 +68,7 @@ const MessagesPage = () => {
   // Handle status update
   const handleStatusChange = async (messageId, newStatus) => {
     try {
-      await axios.put(`http://localhost:5000/api/contacts/${messageId}`, { status: newStatus });
+      await axios.put(`https://balaguruva-final-hosting.onrender.com/api/contacts/${messageId}`, { status: newStatus });
       setMessages(messages.map(msg =>
         msg._id === messageId ? { ...msg, status: newStatus } : msg
       ));

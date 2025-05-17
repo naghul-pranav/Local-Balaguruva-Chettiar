@@ -14,7 +14,7 @@ const useProducts = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch('http://localhost:5008/api/products');
+      const response = await fetch('https://final-balaguruva-chettiar-ecommerce.onrender.com/api/products');
       if (!response.ok) throw new Error('Failed to fetch products');
       const data = await response.json();
       setProducts(data);

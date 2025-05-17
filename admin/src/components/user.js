@@ -71,7 +71,7 @@ const UserPage = () => {
   const tableRef = useRef(null);
   const chartContainerRef = useRef(null);
 
-  const API_URL = 'http://localhost:5000';
+  const API_URL = 'https://balaguruva-final-hosting.onrender.com';
 
   useEffect(() => {
     fetchAllData();

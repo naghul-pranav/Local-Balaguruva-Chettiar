@@ -85,7 +85,7 @@ const CartPage = ({ removeFromCart, isLoading, user }) => {
 
       console.log("Updating quantity for productId:", productId, "to:", newQuantity);
       const response = await axios.post(
-        "http://localhost:5008/api/cart/update",
+        "https://final-balaguruva-chettiar-ecommerce.onrender.com/api/cart/update",
         {
           userId: user.email,
           productId,
@@ -160,13 +160,13 @@ const CartPage = ({ removeFromCart, isLoading, user }) => {
       }
       try {
         const token = localStorage.getItem("token");
-        const cartRes = await axios.get(`http://localhost:5008/api/cart/${user.email}`, {
+        const cartRes = await axios.get(`https://final-balaguruva-chettiar-ecommerce.onrender.com/api/cart/${user.email}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const cartData = cartRes.data;
         console.log("🛒 Cart from backend:", cartData);
 
-        const productsRes = await axios.get("http://localhost:5008/api/products");
+        const productsRes = await axios.get("https://final-balaguruva-chettiar-ecommerce.onrender.com/api/products");
         const products = productsRes.data;
         setAllProducts(products);
         console.log("📦 All products:", products);
@@ -224,7 +224,7 @@ const CartPage = ({ removeFromCart, isLoading, user }) => {
       }
 
       try {
-        const response = await fetch("http://localhost:5008/api/cart", {
+        const response = await fetch("https://final-balaguruva-chettiar-ecommerce.onrender.com/api/cart", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -403,7 +403,7 @@ const CartPage = ({ removeFromCart, isLoading, user }) => {
       }
 
       await axios.post(
-        "http://localhost:5008/api/cart/remove",
+        "https://final-balaguruva-chettiar-ecommerce.onrender.com/api/cart/remove",
         {
           userId: user.email,
           productId,

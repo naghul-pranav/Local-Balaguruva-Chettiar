@@ -89,7 +89,7 @@ const Payment = ({
 
   if (paymentMethod === "cod" || paymentMethod === "upi") {
     try {
-      const response = await axios.post("http://localhost:5008/api/orders", orderData, {
+      const response = await axios.post("https://final-balaguruva-chettiar-ecommerce.onrender.com/api/orders", orderData, {
         timeout: 10000,
         headers: {
           "Content-Type": "application/json",
@@ -104,7 +104,7 @@ const Payment = ({
       // Clear cart for COD (not UPI, as payment is pending)
       if (paymentMethod === "cod") {
         try {
-          await axios.delete(`http://localhost:5008/api/cart/${userEmail}`, {
+          await axios.delete(`https://final-balaguruva-chettiar-ecommerce.onrender.com/api/cart/${userEmail}`, {
             headers: {
               "Content-Type": "application/json",
               ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -162,7 +162,7 @@ const Payment = ({
         };
         orderData.paymentResult = paymentResult;
         try {
-          const orderResponse = await axios.post("http://localhost:5008/api/orders", orderData, {
+          const orderResponse = await axios.post("https://final-balaguruva-chettiar-ecommerce.onrender.com/api/orders", orderData, {
             timeout: 10000,
             headers: {
               "Content-Type": "application/json",
@@ -176,7 +176,7 @@ const Payment = ({
 
           // Clear cart for Razorpay
           try {
-            await axios.delete(`http://localhost:5008/api/cart/${userEmail}`, {
+            await axios.delete(`https://final-balaguruva-chettiar-ecommerce.onrender.com/api/cart/${userEmail}`, {
               headers: {
                 "Content-Type": "application/json",
                 ...(token ? { Authorization: `Bearer ${token}` } : {}),
