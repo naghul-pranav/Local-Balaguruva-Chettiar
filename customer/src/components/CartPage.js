@@ -1396,11 +1396,7 @@ const CartPage = ({ removeFromCart, isLoading, user }) => {
                     whileHover={{ scale: 1.05 }}
                   >
                     ₹{(item.discountedPrice * item.quantity).toFixed(2)}
-                    <motion.div
-                      className="absolute inset-0 bg-gradient-to-r from-teal-600/20 to-[#B87333]/20"
-                      animate={{ x: ['-100%', '100%'] }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                    />
+                  
                   </motion.span>
                 </div>
               ))}

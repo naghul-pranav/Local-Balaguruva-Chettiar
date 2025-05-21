@@ -198,7 +198,8 @@ const Orders = () => {
                  <FaTimes className="text-red-600" />}
               </div>
               <div>
-                <p className="font-medium capitalize">{order.paymentMethod === 'razorpay' ? 'Online Payment' : 'Cash on Delivery'}</p>
+                <p className="font-medium capitalize">{order.paymentMethod === 'razorpay' ? 'Online Payment' :
+                                                       order.paymentMethod === 'upi' ? 'UPI' : 'Cash on Delivery'}</p>
                 <p className="text-sm text-gray-500 capitalize">
                   Status: {order.paymentStatus}
                   {order.paymentResult?.id && ` (ID: ${order.paymentResult.id.substring(0, 10)}...)`}

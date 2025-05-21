@@ -624,24 +624,6 @@ const UserProfile = () => {
                     <p className="text-sm text-gray-500">Email verification</p>
                     <p className="font-medium">{user.email}</p>
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Phone</p>
-                    {editMode ? (
-                      <input
-                        type="text"
-                        name="phone"
-                        value={editedUser.phone || ""}
-                        onChange={handleInputChange}
-                        className="font-medium bg-transparent border-b border-gray-300 outline-none w-full"
-                        placeholder="Add your phone number"
-                      />
-                    ) : (
-                      <p className="font-medium flex items-center">
-                        <FaPhone className="mr-2 text-emerald-500 text-xs" />
-                        {user.phone || "Not provided"}
-                      </p>
-                    )}
-                  </div>
                   {!user.googleId && (
                     <div>
                       <button
