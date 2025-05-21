@@ -12,6 +12,8 @@ import Footer from "./components/Footer";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
 import UserProfile from "./components/UserProfile";
+import Orders from "./components/Orders"; // Added import for Orders
+import Wishlist from "./components/Wishlist"; // Added import for Wishlist
 import { TranslationProvider } from './utils/TranslationContext';
 import './App.css';
 import axios from "axios";
@@ -167,6 +169,26 @@ const App = () => {
               element={
                 <ProtectedRoute>
                   <UserProfile />
+                </ProtectedRoute>
+              }
+            />
+            
+            {/* Orders route */}
+            <Route 
+              path="/orders" 
+              element={
+                <ProtectedRoute>
+                  <Orders />
+                </ProtectedRoute>
+              }
+            />
+            
+            {/* Wishlist route */}
+            <Route 
+              path="/wishlist" 
+              element={
+                <ProtectedRoute>
+                  <Wishlist />
                 </ProtectedRoute>
               }
             />

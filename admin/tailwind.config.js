@@ -35,6 +35,10 @@ module.exports = {
           950: '#2e1065',
         },
         light: '#fafafa',
+        terracotta: '#C14438',
+        cream: '#FDF6F0',
+        copper: '#B87333',
+        teal: '#2DD4BF',
       },
       animation: {
         fadeIn: 'fadeIn 1.5s ease-in-out',
@@ -98,6 +102,10 @@ module.exports = {
       boxShadow: {
         'neon': '0 0 20px rgba(59, 130, 246, 0.5)',
         'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
+      },
+      fontFamily: {
+        inter: ['Inter', 'sans-serif'],
+        playfair: ['Playfair Display', 'serif'],
       },
     },
   },

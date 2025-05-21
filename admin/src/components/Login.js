@@ -191,7 +191,7 @@ const Login = () => {
                     <div className="mx-auto h-16 w-16 sm:h-20 sm:w-20 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 dark:from-indigo-600 dark:via-purple-600 dark:to-pink-600 rounded-2xl flex items-center justify-center shadow-lg transform transition-transform hover:scale-105 rotate-3 hover:rotate-0 duration-300">
                         <ShoppingBag className="h-8 w-8 sm:h-10 sm:w-10 text-white drop-shadow-md" />
                     </div>
-                    <h1 className="mt-4 text-2xl sm:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400">Balaguruva Chettiar Admin</h1>
+                    <h1 className="mt-4 text-2xl sm:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400">K.Balaguruva Chettiar Admin</h1>
                     <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Welcome back! Please sign in to continue</p>
                 </div>
                 
@@ -412,7 +412,7 @@ const Login = () => {
                     </div>
                     
                     <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
-                        Balaguruva Chettiar Admin Panel © {new Date().getFullYear()} • All Rights Reserved
+                        K.Balaguruva Chettiar Admin Panel © {new Date().getFullYear()} • All Rights Reserved
                     </p>
                 </div>
             </div>

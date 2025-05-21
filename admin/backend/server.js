@@ -350,7 +350,7 @@ app.post("/api/admin/send-otp", async (req, res) => {
     const mailOptions = {
       from: 'contact.balaguruvachettiarsons@gmail.com',
       to: email,
-      subject: 'Your Admin Login OTP - Balaguruva Chettiar',
+      subject: 'Your Admin Login OTP - K.Balaguruva Chettiar',
       text: `Your one-time password (OTP) for admin login is: ${otp}\nThis OTP is valid for 10 minutes.`
     };
 

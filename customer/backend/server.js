@@ -249,7 +249,7 @@ app.post('/send-verification', async (req, res) => {
 
   try {
     await transporter.sendMail({
-      from: '"Balaguruva Chettiar Sons Co" <kknaghulpranav@gmail.com>',
+      from: '"K.Balaguruva Chettiar Sons Co" <contact.balaguruvachettiarsons@gmail.com>',
       to: email,
       subject: 'Your Verification Code',
       text: `Your verification code is: ${code}`,
@@ -290,7 +290,7 @@ app.post('/api/forgot-password', async (req, res) => {
 
     // Send OTP via email
     await transporter.sendMail({
-      from: '"Balaguruva Chettiar Sons Co" <contact.balaguruvachettiarsons@gmail.com>',
+      from: '"K.Balaguruva Chettiar Sons Co" <contact.balaguruvachettiarsons@gmail.com>',
       to: email,
       subject: 'Password Reset OTP',
       text: `Your OTP for password reset is: ${otp}. It is valid for 10 minutes.`,

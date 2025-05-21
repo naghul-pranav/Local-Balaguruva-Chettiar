@@ -72,7 +72,7 @@ const Navbar = () => {
                 <ShoppingBag className="w-5 h-5" />
               </div>
               <span className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
-                <pre>Balaguruva Chettiar Sons   </pre>   
+                <pre>K.Balaguruva Chettiar Sons   </pre>   
               </span>
             </Link>
 
