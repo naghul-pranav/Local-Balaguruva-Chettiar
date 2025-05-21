@@ -1212,7 +1212,30 @@ app.delete('/api/user/wishlist/:productId', authenticateToken, async (req, res) 
     res.status(500).json({ message: 'Server error while removing from wishlist' });
   }
 });
+// Clear Entire Wishlist
+app.delete('/api/user/wishlist', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
 
+    // Find the user
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Clear the wishlist
+    user.wishlist = [];
+    user.lastUpdated = new Date();
+
+    // Save the user document, disabling versioning to avoid VersionError
+    await user.save({ versionKey: false });
+
+    res.status(200).json({ message: 'Wishlist cleared successfully' });
+  } catch (error) {
+    console.error('Error clearing wishlist:', error);
+    res.status(500).json({ message: 'Server error while clearing wishlist' });
+  }
+});
 // Clear Entire Wishlist
 app.post('/api/user/wishlist', authenticateToken, async (req, res) => {
   try {
