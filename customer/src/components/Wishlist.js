@@ -167,7 +167,7 @@ const Wishlist = () => {
     setShowClearWishlistModal(true);
   };
 
-  const confirmClearWishlist = async () => {
+    const confirmClearWishlist = async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) throw new Error("Authentication token not found");
@@ -195,7 +195,8 @@ const Wishlist = () => {
       }, 3000);
       setShowClearWishlistModal(false);
     } catch (error) {
-      setWishlistError("Failed to clear wishlist.");
+      console.error("Error clearing wishlist:", error.response?.status, error.response?.data);
+      setWishlistError(error.response?.data?.message || "Failed to clear wishlist.");
       setShowClearWishlistModal(false);
     }
   };

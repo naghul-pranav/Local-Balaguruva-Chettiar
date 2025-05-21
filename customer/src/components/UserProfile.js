@@ -661,7 +661,7 @@ const UserProfile = () => {
                       }}
                       className="flex items-center text-red-600 hover:text-red-800 text-sm mt-4"
                     >
-                      <FaSignOutAlt className="mr-1" /> Log out from all devices
+                      <FaSignOutAlt className="mr-1" /> Logout
                     </button>
                   </div>
                 </div>
