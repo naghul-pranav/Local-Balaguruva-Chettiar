@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import Navbar from './Navbar';
-import { Line, Bar, Doughnut } from 'react-chartjs-2';
+import { Bar } from 'react-chartjs-2';
 import { 
   Chart as ChartJS, 
   CategoryScale, 
@@ -11,20 +11,16 @@ import {
   Title, 
   Tooltip, 
   Legend,
-  ArcElement,
   BarElement,
   TimeScale,
-  RadialLinearScale,
-  RadarController
 } from 'chart.js';
 import { 
   Search, RefreshCw, ChevronDown, ChevronUp, Download, 
-  User as UserIcon, Sun, Moon, Filter, HelpCircle, Bell, 
-  BarChart2, LineChart, PieChart, Calendar, Tag, Mail, 
-  AlertTriangle, CheckCircle, Activity, PlusCircle,
-  Map, Phone, Clock, Settings, Package, Clipboard,
-  UserCheck, MapPin, Layers, List, Grid, LogOut, 
-  ThumbsUp, Eye, EyeOff, Award
+  User as UserIcon, Calendar, Tag, Mail, 
+  AlertTriangle, CheckCircle, PlusCircle,
+  Map, Phone, Clock, Package, Clipboard,
+  UserCheck, MapPin, List, Grid, LogOut, 
+  ThumbsUp, Eye,
 } from 'lucide-react';
 
 ChartJS.register(
@@ -35,11 +31,8 @@ ChartJS.register(
   Title, 
   Tooltip, 
   Legend,
-  ArcElement,
   BarElement,
   TimeScale,
-  RadialLinearScale,
-  RadarController
 );
 
 const UserPage = () => {
@@ -57,16 +50,8 @@ const UserPage = () => {
   const [userOrders, setUserOrders] = useState([]); // State to store fetched orders
   const [signupData, setSignupData] = useState({});
   const [refreshing, setRefreshing] = useState(false);
-  const [dateRange, setDateRange] = useState({ start: null, end: null });
   const [notifications, setNotifications] = useState([]);
-  const [chartType, setChartType] = useState('line');
   const [userStatistics, setUserStatistics] = useState({});
-  const [activityLog, setActivityLog] = useState([]);
-  const [selectedUsers, setSelectedUsers] = useState([]);
-  const [showWelcomeBanner, setShowWelcomeBanner] = useState(true);
-  const [distributionData, setDistributionData] = useState({});
-  const [userActivityData, setUserActivityData] = useState({});
-  const [analyticsLoading, setAnalyticsLoading] = useState(true);
 
   const tableRef = useRef(null);
   const chartContainerRef = useRef(null);
@@ -120,21 +105,15 @@ const UserPage = () => {
   };
 
   const fetchUserAnalytics = async () => {
-    setAnalyticsLoading(true);
     try {
       const response = await axios.get(`${API_URL}/api/users`);
       if (response.data) {
         const userData = response.data;
-        setUserStatistics(processUserStats(userData));
-        setActivityLog(generateActivityLog(userData));
-        processEmailDomainDistribution(userData);
-        setUserActivityData(generateActivityPatterns(userData));
+        setUserStatistics({ totalUsers: userData.length });
       }
-      setAnalyticsLoading(false);
     } catch (err) {
       console.error("Error fetching analytics:", err);
       addNotification("Failed to load analytics", "error");
-      setAnalyticsLoading(false);
     }
   };
 
@@ -152,10 +131,8 @@ const UserPage = () => {
   // Fetch orders for the selected user
   const fetchUserOrders = async (userId) => {
     try {
-      // Since /api/orders requires authentication, we'll use the unauthenticated endpoint
       const response = await axios.get(`${API_URL}/api/orders/admin/all`);
       const orders = response.data.orders || [];
-      // Filter orders for the selected user
       const userSpecificOrders = orders.filter(order => 
         order.user && order.user.toString() === userId
       );
@@ -179,166 +156,40 @@ const UserPage = () => {
     }
   };
 
-  const processUserStats = (userData) => {
-    const now = new Date();
-    const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 30));
-    
-    const activeUsers = userData.filter(user => {
-      const lastActivity = new Date(user.lastLogin || user.createdAt);
-      return lastActivity >= thirtyDaysAgo;
-    }).length;
-
-    const totalUsers = userData.length;
-    const monthlyGrowth = calculateMonthlyGrowth(userData);
-    
-    return {
-      totalUsers,
-      activeUsers,
-      retentionRate: Math.round((activeUsers / totalUsers) * 100),
-      growthRate: monthlyGrowth,
-      dailyActiveUsers: Math.round(activeUsers * 0.3),
-      averageSessionTime: 15
-    };
-  };
-
-  const calculateMonthlyGrowth = (userData) => {
-    const now = new Date();
-    const thisMonth = userData.filter(user => {
-      const created = new Date(user.createdAt);
-      return created.getMonth() === now.getMonth() &&
-             created.getFullYear() === now.getFullYear();
-    }).length;
-
-    const lastMonth = userData.filter(user => {
-      const created = new Date(user.createdAt);
-      const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1);
-      return created.getMonth() === lastMonthDate.getMonth() &&
-             created.getFullYear() === lastMonthDate.getFullYear();
-    }).length;
-
-    return lastMonth ? Math.round(((thisMonth - lastMonth) / lastMonth) * 100) : 0;
-  };
-
-  const generateActivityLog = (userData) => {
-    return userData
-      .slice(0, 10)
-      .map(user => ({
-        id: user._id,
-        type: 'signup',
-        user: user.email,
-        time: user.createdAt,
-        details: 'New user registration'
-      }))
-      .sort((a, b) => new Date(b.time) - new Date(a.time));
-  };
-
   const processSignupData = (userData) => {
-    if (!userData || userData.length === 0) return;
-    
-    const monthlySignups = {};
-    const last12Months = [];
-    
-    const now = new Date();
-    for (let i = 11; i >= 0; i--) {
-      const month = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const monthKey = `${month.toLocaleString('en-US', { month: 'short' })} ${month.getFullYear()}`;
-      last12Months.push(monthKey);
-      monthlySignups[monthKey] = 0;
+  if (!userData || userData.length === 0) return;
+  
+  const dailySignups = {};
+  const last30Days = [];
+  
+  const now = new Date();
+  for (let i = 29; i >= 0; i--) {
+    const day = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+    const dayKey = day.toLocaleString('en-US', { month: 'short', day: 'numeric' });
+    last30Days.push(dayKey);
+    dailySignups[dayKey] = 0;
+  }
+  
+  userData.forEach(user => {
+    const date = new Date(user.createdAt);
+    const dayKey = date.toLocaleString('en-US', { month: 'short', day: 'numeric' });
+    if (dailySignups[dayKey] !== undefined) {
+      dailySignups[dayKey] += 1;
     }
-    
-    userData.forEach(user => {
-      const date = new Date(user.createdAt);
-      const monthYear = `${date.toLocaleString('en-US', { month: 'short' })} ${date.getFullYear()}`;
-      if (monthlySignups[monthYear] !== undefined) {
-        monthlySignups[monthYear] += 1;
-      }
-    });
-    
-    setSignupData({
-      labels: last12Months,
-      datasets: [{
-        label: 'New User Signups',
-        data: last12Months.map(month => monthlySignups[month]),
-        fill: true,
-        backgroundColor: 'rgba(101, 116, 205, 0.2)',
-        borderColor: 'rgba(101, 116, 205, 1)',
-        tension: 0.4,
-        pointRadius: 4,
-        pointHoverRadius: 6,
-        pointBackgroundColor: 'rgba(101, 116, 205, 1)'
-      }]
-    });
-  };
-
-  const processEmailDomainDistribution = (userData) => {
-    const usersByDomain = userData.reduce((acc, user) => {
-      if (user.email) {
-        const domain = user.email.split('@')[1];
-        acc[domain] = (acc[domain] || 0) + 1;
-      }
-      return acc;
-    }, {});
-    
-    const topDomains = Object.entries(usersByDomain)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5);
-    
-    const otherCount = Object.values(usersByDomain)
-      .reduce((sum, count) => sum + count, 0) - 
-      topDomains.reduce((sum, [_, count]) => sum + count, 0);
-    
-    if (otherCount > 0) {
-      topDomains.push(['Other', otherCount]);
-    }
-    
-    setDistributionData({
-      labels: topDomains.map(([domain]) => domain),
-      datasets: [{
-        data: topDomains.map(([_, count]) => count),
-        backgroundColor: [
-          '#6366F1', '#8B5CF6', '#EC4899', '#14B8A6', '#84CC16', '#F59E0B'
-        ],
-        borderWidth: 1
-      }]
-    });
-  };
-
-  const generateActivityPatterns = (userData) => {
-    const weekday = Array(24).fill(0);
-    const weekend = Array(24).fill(0);
-
-    userData.forEach(user => {
-      const date = new Date(user.createdAt);
-      const hour = date.getHours();
-      const isWeekend = date.getDay() === 0 || date.getDay() === 6;
-      
-      if (isWeekend) {
-        weekend[hour]++;
-      } else {
-        weekday[hour]++;
-      }
-    });
-
-    return {
-      labels: Array.from({ length: 24 }, (_, i) => `${i}:00`),
-      datasets: [
-        {
-          label: 'Weekday',
-          data: weekday,
-          borderColor: 'rgba(101, 116, 205, 1)',
-          backgroundColor: 'rgba(101, 116, 205, 0.2)',
-          fill: true,
-        },
-        {
-          label: 'Weekend',
-          data: weekend,
-          borderColor: 'rgba(236, 72, 153, 1)',
-          backgroundColor: 'rgba(236, 72, 153, 0.2)',
-          fill: true,
-        }
-      ]
-    };
-  };
+  });
+  
+  setSignupData({
+    labels: last30Days,
+    datasets: [{
+      label: 'Daily User Signups',
+      data: last30Days.map(day => dailySignups[day]),
+      backgroundColor: 'rgba(101, 116, 205, 0.8)',
+      borderColor: 'rgba(101, 116, 205, 1)',
+      borderWidth: 1,
+      hoverBackgroundColor: 'rgba(101, 116, 205, 1)',
+    }]
+  });
+};
 
   const refreshUserData = async () => {
     setRefreshing(true);
@@ -409,7 +260,7 @@ const UserPage = () => {
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
-    if (isNaN(date.getTime())) return 'N/A'; // Handle invalid dates
+    if (isNaN(date.getTime())) return 'N/A';
     return date.toLocaleString('en-IN', {
       year: 'numeric',
       month: 'long',
@@ -478,73 +329,10 @@ const UserPage = () => {
     }
   };
 
-  const donutOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    cutout: '70%',
-    animation: {
-      animateScale: true,
-      animateRotate: true
-    },
-    plugins: {
-      legend: {
-        position: 'right',
-        labels: {
-          padding: 15,
-          usePointStyle: true,
-          pointStyle: 'circle',
-          font: { size: 11 }
-        }
-      },
-      tooltip: {
-        backgroundColor: 'rgba(255,255,255,0.9)',
-        titleColor: '#333',
-        bodyColor: '#333',
-        callbacks: {
-          label: (context) => {
-            const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
-            const percentage = Math.round((context.raw / total) * 100);
-            return `${context.label}: ${context.raw} (${percentage}%)`;
-          }
-        }
-      }
-    }
-  };
-
   const renderChart = () => {
     if (!signupData.datasets) return null;
-    return chartType === 'bar' ? (
+    return (
       <Bar data={signupData} options={chartOptions} height={200} />
-    ) : (
-      <Line data={signupData} options={chartOptions} height={200} />
-    );
-  };
-
-  const renderActivityChart = () => {
-    if (!userActivityData.datasets) return null;
-    return (
-      <Line 
-        data={userActivityData} 
-        options={{
-          ...chartOptions,
-          plugins: {
-            ...chartOptions.plugins,
-            legend: { position: 'bottom' }
-          }
-        }} 
-        height={120} 
-      />
-    );
-  };
-
-  const renderEmailDistributionChart = () => {
-    if (!distributionData.datasets) return null;
-    return (
-      <Doughnut 
-        data={distributionData} 
-        options={donutOptions}
-        height={200}
-      />
     );
   };
 
@@ -554,26 +342,6 @@ const UserPage = () => {
     setTimeout(() => {
       setNotifications(prev => prev.filter(n => n.id !== id));
     }, 3000);
-  };
-
-  const formatActivityTime = (isoTime) => {
-    const date = new Date(isoTime);
-    const now = new Date();
-    const diffMs = now - date;
-    const diffMins = Math.floor(diffMs / 60000);
-    
-    if (diffMins < 60) {
-      return `${diffMins} min${diffMins !== 1 ? 's' : ''} ago`;
-    }
-    return date.toLocaleDateString();
-  };
-
-  const getActivityIcon = (type) => {
-    return type === 'signup' ? (
-      <PlusCircle size={16} className="text-green-500" />
-    ) : (
-      <Activity size={16} className="text-blue-500" />
-    );
   };
 
   return (
@@ -591,28 +359,29 @@ const UserPage = () => {
                 placeholder="Search users..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent pl-10"
               />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
             </div>
             
             <div className="flex gap-2">
               <button
                 onClick={() => setViewMode('active')}
-                className={`px-4 py-2 rounded-md ${
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
                   viewMode === 'active'
-                    ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white'
-                    : 'bg-gray-200 text-gray-800'
-                } hover:from-indigo-600 hover:to-purple-700 hover:text-white transition-all`}
+                    ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md'
+                    : 'bg-white text-gray-800 border border-gray-200 hover:bg-gray-50'
+                }`}
               >
                 Active Users
               </button>
               <button
                 onClick={() => setViewMode('deleted')}
-                className={`px-4 py-2 rounded-md ${
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
                   viewMode === 'deleted'
-                    ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white'
-                    : 'bg-gray-200 text-gray-800'
-                } hover:from-indigo-600 hover:to-purple-700 hover:text-white transition-all`}
+                    ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md'
+                    : 'bg-white text-gray-800 border border-gray-200 hover:bg-gray-50'
+                }`}
               >
                 Deleted Users
               </button>
@@ -621,7 +390,7 @@ const UserPage = () => {
             <button
               onClick={refreshUserData}
               disabled={refreshing}
-              className="inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg hover:from-indigo-600 hover:to-purple-700 transition-all shadow-md"
+              className="inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg hover:from-indigo-600 hover:to-purple-700 transition-all shadow-md text-sm"
             >
               {refreshing ? (
                 <>
@@ -638,75 +407,19 @@ const UserPage = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 gap-4 mb-8">
           <div className="bg-gradient-to-br from-white to-blue-50 p-4 rounded-lg shadow-md border border-indigo-100 transform transition-all hover:scale-105">
             <h3 className="text-gray-500 text-sm font-medium">Total Users</h3>
             <p className="text-2xl font-bold text-gray-900">{userStatistics.totalUsers || 0}</p>
           </div>
-          
-          <div className="bg-gradient-to-br from-white to-purple-50 p-4 rounded-lg shadow-md border border-purple-100 transform transition-all hover:scale-105">
-            <h3 className="text-gray-500 text-sm font-medium">Active Users</h3>
-            <p className="text-2xl font-bold text-gray-900">{userStatistics.activeUsers || 0}</p>
-          </div>
-          
-          <div className="bg-gradient-to-br from-white to-pink-50 p-4 rounded-lg shadow-md border border-pink-100 transform transition-all hover:scale-105">
-            <h3 className="text-gray-500 text-sm font-medium">Retention Rate</h3>
-            <p className="text-2xl font-bold text-gray-900">{userStatistics.retentionRate || 0}%</p>
-          </div>
-          
-          <div className="bg-gradient-to-br from-white to-emerald-50 p-4 rounded-lg shadow-md border border-emerald-100 transform transition-all hover:scale-105">
-            <h3 className="text-gray-500 text-sm font-medium">Growth Rate</h3>
-            <p className="text-2xl font-bold text-gray-900">{userStatistics.growthRate || 0}%</p>
-          </div>
         </div>
 
-        <div className="mb-4 flex justify-end">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-1 inline-flex">
-            <button
-              onClick={() => setChartType('line')}
-              className={`px-3 py-1 text-sm rounded-md ${
-                chartType === 'line' 
-                  ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white' 
-                  : 'text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              <LineChart size={14} className="inline mr-1" />
-              Line
-            </button>
-            <button
-              onClick={() => setChartType('bar')}
-              className={`px-3 py-1 text-sm rounded-md ${
-                chartType === 'bar' 
-                  ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white' 
-                  : 'text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              <BarChart2 size={14} className="inline mr-1" />
-              Bar
-            </button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="mb-8">
           <div className="bg-white p-4 rounded-lg shadow-md border border-indigo-100 transition-all duration-300 hover:shadow-lg">
             <h3 className="text-lg font-semibold mb-4 text-gray-800">User Growth</h3>
             <div className="h-60 md:h-80" ref={chartContainerRef}>
               {renderChart()}
             </div>
-          </div>
-          
-          <div className="bg-white p-4 rounded-lg shadow-md border border-indigo-100 transition-all duration-300 hover:shadow-lg">
-            <h3 className="text-lg font-semibold mb-4 text-gray-800">Email Distribution</h3>
-            <div className="h-60 md:h-80">
-              {renderEmailDistributionChart()}
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-lg shadow-md border border-indigo-100 mb-8 transition-all duration-300 hover:shadow-lg">
-          <h3 className="text-lg font-semibold mb-4 text-gray-800">User Activity Patterns</h3>
-          <div className="h-40 md:h-60">
-            {renderActivityChart()}
           </div>
         </div>
 
@@ -719,15 +432,16 @@ const UserPage = () => {
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={exportToCSV}
-                className="px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded hover:from-emerald-600 hover:to-teal-700 transition-all shadow-sm text-sm"
+                className="px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded hover:from-emerald-600 hover:to-teal-700 transition-all shadow-sm text-sm flex items-center"
               >
+                <Download size={16} className="mr-2" />
                 Export to CSV
               </button>
               
               <select
                 value={usersPerPage}
                 onChange={(e) => setUsersPerPage(Number(e.target.value))}
-                className="px-3 py-1.5 border rounded bg-white text-sm"
+                className="px-3 py-1.5 border rounded bg-white text-sm focus:ring-2 focus:ring-indigo-500"
               >
                 <option value="10">10 per page</option>
                 <option value="25">25 per page</option>
@@ -736,54 +450,73 @@ const UserPage = () => {
             </div>
           </div>
           
-          <div className="overflow-x-auto" ref={tableRef}>
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gradient-to-r from-indigo-50 to-blue-50">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Name
-                    <button onClick={() => requestSort('name')}>
-                      {sortConfig.key === 'name' && (sortConfig.direction === 'asc' ? <ChevronUp size={16} /> : <ChevronDown size={16} />)}
-                    </button>
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Email
-                    <button onClick={() => requestSort('email')}>
-                      {sortConfig.key === 'email' && (sortConfig.direction === 'asc' ? <ChevronUp size={16} /> : <ChevronDown size={16} />)}
-                    </button>
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Sign-up Date
-                    <button onClick={() => requestSort('createdAt')}>
-                      {sortConfig.key === 'createdAt' && (sortConfig.direction === 'asc' ? <ChevronUp size={16} /> : <ChevronDown size={16} />)}
-                    </button>
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {currentUsers.map((user) => (
-                  <tr key={user._id} className="hover:bg-indigo-50">
-                    <td className="px-4 py-3 text-sm text-gray-900">{user.name || 'N/A'}</td>
-                    <td className="px-4 py-3 text-sm text-gray-700">{user.email}</td>
-                    <td className="px-4 py-3 text-sm text-gray-700">
-                      {new Date(user.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="px-4 py-3 text-sm">
+          <div className="p-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {currentUsers.length > 0 ? (
+                currentUsers.map((user) => (
+                  <div
+                    key={user._id}
+                    className="bg-gradient-to-br from-white to-indigo-50 rounded-lg shadow-md p-4 border-l-4 border-indigo-500 hover:shadow-lg hover:scale-105 transition-all duration-300"
+                  >
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <div className="flex items-center">
+                          <span className="text-sm font-semibold text-indigo-600">{user.name || 'N/A'}</span>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1 flex items-center">
+                          <Mail size={14} className="mr-1 text-indigo-500" />
+                          {user.email}
+                        </p>
+                        <p className="text-xs text-gray-500 flex items-center">
+                          <Calendar size={14} className="mr-1 text-indigo-500" />
+                          Joined: {new Date(user.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
                       <button 
                         onClick={() => setSelectedUser(user)}
-                        className="px-3 py-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-md hover:from-blue-600 hover:to-indigo-700 transition-all shadow-sm"
+                        className="px-3 py-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-md hover:from-blue-600 hover:to-indigo-700 transition-all shadow-sm text-sm flex items-center"
                       >
+                        <Eye size={16} className="mr-1" />
                         View
                       </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    </div>
+                    <div className="flex space-x-2">
+                      <button 
+                        onClick={() => requestSort('name')}
+                        className="text-gray-400 hover:text-indigo-600 flex items-center text-xs"
+                      >
+                        Sort by Name
+                        {sortConfig.key === 'name' && (sortConfig.direction === 'asc' ? <ChevronUp size={14} className="ml-1" /> : <ChevronDown size={14} className="ml-1" />)}
+                      </button>
+                      <button 
+                        onClick={() => requestSort('email')}
+                        className="text-gray-400 hover:text-indigo-600 flex items-center text-xs"
+                      >
+                        Sort by Email
+                        {sortConfig.key === 'email' && (sortConfig.direction === 'asc' ? <ChevronUp size={14} className="ml-1" /> : <ChevronDown size={14} className="ml-1" />)}
+                      </button>
+                      <button 
+                        onClick={() => requestSort('createdAt')}
+                        className="text-gray-400 hover:text-indigo-600 flex items-center text-xs"
+                      >
+                        Sort by Date
+                        {sortConfig.key === 'createdAt' && (sortConfig.direction === 'asc' ? <ChevronUp size={14} className="ml-1" /> : <ChevronDown size={14} className="ml-1" />)}
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="col-span-full text-center py-8">
+                  <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-lg inline-block">
+                    <Search className="text-2xl text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-500">No users found matching your criteria</p>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
           
-          <div className="p-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+          <div className="p-4 flex flex-col sm:flex-row justify-between items-center gap-3 border-t border-gray-200">
             <div className="text-sm text-gray-600">
               Showing {indexOfFirstUser + 1} to {Math.min(indexOfLastUser, filteredUsers.length)} of {filteredUsers.length} users
             </div>
@@ -792,14 +525,14 @@ const UserPage = () => {
               <button
                 onClick={() => setCurrentPage(1)}
                 disabled={currentPage === 1}
-                className="px-3 py-1 border rounded disabled:opacity-50"
+                className="px-3 py-1 border rounded disabled:opacity-50 bg-white hover:bg-gray-50 text-sm"
               >
                 First
               </button>
               {Array.from({ length: totalPages }, (_, i) => i + 1).map(number => (
                 <button 
                   key={number}
-                  className={`px-4 py-2 text-sm font-medium ${
+                  className={`px-4 py-2 text-sm font-medium transition-all duration-200 ${
                     currentPage === number 
                       ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-sm' 
                       : 'bg-white text-gray-700 hover:bg-indigo-50'
@@ -812,7 +545,7 @@ const UserPage = () => {
               <button
                 onClick={() => setCurrentPage(totalPages)}
                 disabled={currentPage === totalPages}
-                className="px-3 py-1 border rounded disabled:opacity-50"
+                className="px-3 py-1 border rounded disabled:opacity-50 bg-white hover:bg-gray-50 text-sm"
               >
                 Last
               </button>

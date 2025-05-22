@@ -142,25 +142,17 @@ const AnalyticsDashboard = ({ orders }) => {
       statusCounts[order.orderStatus] = (statusCounts[order.orderStatus] || 0) + 1;
     });
     
-    // Calculate revenue by day
-    const revenueByDay = last7Days.map(day => {
-      return orders
-        .filter(order => 
-          new Date(order.createdAt).toISOString().split('T')[0] === day &&
-          order.orderStatus !== "cancelled"
-        )
-        .reduce((total, order) => total + order.totalPrice, 0);
-    });
-        
     return {
       ordersByDay: {
         labels: last7Days.map(day => day.slice(5)), // MM-DD format
         datasets: [{
           label: 'Orders',
           data: ordersByDay,
-          backgroundColor: 'rgba(59, 130, 246, 0.5)',
-          borderColor: 'rgb(59, 130, 246)',
-          borderWidth: 1
+          backgroundColor: 'rgba(13, 148, 136, 0.3)', // Teal with transparency
+          borderColor: 'rgb(13, 148, 136)', // Teal
+          borderWidth: 2,
+          fill: true,
+          tension: 0.4 // Smooth curve
         }]
       },
       ordersByStatus: {
@@ -168,24 +160,18 @@ const AnalyticsDashboard = ({ orders }) => {
         datasets: [{
           data: Object.values(statusCounts),
           backgroundColor: [
-            'rgba(245, 158, 11, 0.7)', // processing
-            'rgba(59, 130, 246, 0.7)', // shipped
-            'rgba(16, 185, 129, 0.7)', // delivered
-            'rgba(239, 68, 68, 0.7)'   // cancelled
+            'rgba(13, 148, 136, 0.7)',  // Teal (processing)
+            'rgba(184, 115, 51, 0.7)',  // Copper (shipped)
+            'rgba(56, 178, 172, 0.7)',  // Lighter teal (delivered)
+            'rgba(139, 69, 19, 0.7)'    // Darker copper (cancelled)
+          ],
+          borderColor: [
+            'rgb(13, 148, 136)',
+            'rgb(184, 115, 51)',
+            'rgb(56, 178, 172)',
+            'rgb(139, 69, 19)'
           ],
           borderWidth: 1
-        }]
-      },
-      revenueByDay: {
-        labels: last7Days.map(day => day.slice(5)), // MM-DD format
-        datasets: [{
-          label: 'Revenue (₹)',
-          data: revenueByDay,
-          backgroundColor: 'rgba(16, 185, 129, 0.5)',
-          borderColor: 'rgb(16, 185, 129)',
-          borderWidth: 1,
-          fill: false,
-          tension: 0.1
         }]
       }
     };
@@ -196,9 +182,8 @@ const AnalyticsDashboard = ({ orders }) => {
   // Calculate key metrics
   const totalOrders = orders.length;
   const totalRevenue = orders
-  .filter(order => order.orderStatus !== "cancelled")
-  .reduce((sum, order) => sum + order.totalPrice, 0);
-  const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+    .filter(order => order.orderStatus !== "cancelled")
+    .reduce((sum, order) => sum + order.totalPrice, 0);
   const processingOrders = orders.filter(order => order.orderStatus === 'processing').length;
   
   return (
@@ -207,7 +192,7 @@ const AnalyticsDashboard = ({ orders }) => {
         <FaChartLine className="mr-2 text-indigo-500" /> Order Analytics Dashboard
       </h3>
       
-      <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
+      <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-6">
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-3 sm:p-4 shadow-sm transition-transform hover:scale-105 duration-300">
           <p className="text-xs text-blue-600 font-medium">TOTAL ORDERS</p>
           <p className="text-xl sm:text-2xl font-bold text-blue-700">{totalOrders}</p>
@@ -220,12 +205,6 @@ const AnalyticsDashboard = ({ orders }) => {
           <p className="text-xs text-emerald-600 mt-1">All time</p>
         </div>
         
-        <div className="bg-gradient-to-r from-violet-50 to-purple-50 rounded-lg p-3 sm:p-4 shadow-sm transition-transform hover:scale-105 duration-300">
-          <p className="text-xs text-violet-600 font-medium">AVG ORDER VALUE</p>
-          <p className="text-xl sm:text-2xl font-bold text-violet-700">₹{averageOrderValue.toFixed(2)}</p>
-          <p className="text-xs text-violet-600 mt-1">Per order</p>
-        </div>
-        
         <div className="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-lg p-3 sm:p-4 shadow-sm transition-transform hover:scale-105 duration-300">
           <p className="text-xs text-amber-600 font-medium">PROCESSING</p>
           <p className="text-xl sm:text-2xl font-bold text-amber-700">{processingOrders}</p>
@@ -236,20 +215,28 @@ const AnalyticsDashboard = ({ orders }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6">
         <div>
           <h4 className="text-sm font-medium mb-2">Orders (Last 7 Days)</h4>
-          <div className="h-52 sm:h-64 bg-gradient-to-br from-gray-50 to-blue-50 p-3 sm:p-4 rounded-lg shadow-sm">
-            <Bar data={chartData.ordersByDay} options={{ 
+          <div className="h-52 sm:h-64 bg-gradient-to-br from-teal-50 to-indigo-50 p-3 sm:p-4 rounded-lg shadow-sm">
+            <Line data={chartData.ordersByDay} options={{ 
               maintainAspectRatio: false, 
-              plugins: { legend: { display: false } },
+              plugins: { 
+                legend: { 
+                  display: true,
+                  position: 'top',
+                  labels: { font: { size: 12 } }
+                }
+              },
               responsive: true,
               scales: {
                 x: {
                   ticks: {
                     maxRotation: 45,
                     minRotation: 45,
-                    font: {
-                      size: 10
-                    }
+                    font: { size: 10 }
                   }
+                },
+                y: {
+                  beginAtZero: true,
+                  ticks: { stepSize: 1 }
                 }
               }
             }} />
@@ -257,33 +244,9 @@ const AnalyticsDashboard = ({ orders }) => {
         </div>
         
         <div>
-          <h4 className="text-sm font-medium mb-2">Revenue Trend (Last 7 Days)</h4>
-          <div className="h-52 sm:h-64 bg-gradient-to-br from-gray-50 to-green-50 p-3 sm:p-4 rounded-lg shadow-sm">
-            <Line data={chartData.revenueByDay} options={{ 
-              maintainAspectRatio: false, 
-              plugins: { legend: { display: false } },
-              responsive: true,
-              scales: {
-                x: {
-                  ticks: {
-                    maxRotation: 45,
-                    minRotation: 45,
-                    font: {
-                      size: 10
-                    }
-                  }
-                }
-              }
-            }} />
-          </div>
-        </div>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-        <div className="md:col-span-1">
           <h4 className="text-sm font-medium mb-2">Orders by Status</h4>
-          <div className="h-52 sm:h-64 bg-gradient-to-br from-gray-50 to-purple-50 p-3 sm:p-4 rounded-lg shadow-sm flex items-center justify-center">
-            <Doughnut 
+          <div className="h-52 sm:h-64 bg-gradient-to-br from-teal-50 to-copper-50 p-3 sm:p-4 rounded-lg shadow-sm flex items-center justify-center">
+            <Pie 
               data={chartData.ordersByStatus} 
               options={{ 
                 maintainAspectRatio: false,
@@ -292,9 +255,8 @@ const AnalyticsDashboard = ({ orders }) => {
                     position: window.innerWidth < 768 ? 'bottom' : 'right', 
                     labels: { 
                       boxWidth: 12, 
-                      font: { 
-                        size: 10 
-                      }
+                      font: { size: 12, weight: 'bold' },
+                      color: '#1F2937' // Darker text for better contrast
                     }
                   }
                 }
@@ -302,44 +264,20 @@ const AnalyticsDashboard = ({ orders }) => {
             />
           </div>
         </div>
-        
-        <div className="md:col-span-2">
-          <h4 className="text-sm font-medium mb-2">Recent Activity</h4>
-          <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-3 sm:p-4 rounded-lg shadow-sm h-52 sm:h-64 overflow-auto">
-            <div className="space-y-2">
-              {orders.flatMap((order) =>
-  Array.isArray(order.statusHistory)
-    ? order.statusHistory.map((entry, i) => (
-        <div key={`${order._id}-${i}`} className="flex items-center p-2 sm:p-3 rounded-lg hover:bg-white transition-colors duration-200 border border-transparent hover:border-gray-200 shadow-sm">
-          <div className={`w-3 h-3 sm:w-2 sm:h-2 rounded-full mr-2 ${
-            entry.status === 'delivered' ? 'bg-gradient-to-r from-green-400 to-green-500' : 
-            entry.status === 'processing' ? 'bg-gradient-to-r from-amber-400 to-amber-500' : 
-            entry.status === 'shipped' ? 'bg-gradient-to-r from-blue-400 to-blue-500' : 'bg-gradient-to-r from-red-400 to-red-500'
-          }`}></div>
-
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium truncate">{order.orderReference}</p>
-            <p className="text-xs text-gray-500 truncate">{new Date(entry.timestamp).toLocaleString()}</p>
-          </div>
-
-          <div className="text-right">
-            <p className="text-xs font-medium">₹{order.totalPrice.toFixed(2)}</p>
-            <p className="text-xs capitalize">{entry.status}</p>
-          </div>  
-        </div>
-      ))
-    : [] // 👈 If no statusHistory, return empty
-).reverse().slice(0, 5)
-}
-            </div>
-          </div>
-        </div>
       </div>
+
+      <style jsx>{`
+        .bg-teal-50 {
+          background-color: #E6FFFA;
+        }
+        .bg-copper-50 {
+          background-color: #FDF2E9;
+        }
+      `}</style>
     </div>
   );
 };
 
-// Enhanced OrderDetailsModal component
 // Enhanced OrderDetailsModal component
 const OrderDetailsModal = ({ order, onClose, onStatusChange, statusOptions, getStatusBadgeStyle, formatDate, customers }) => {
   const [localStatus, setLocalStatus] = useState(order?.orderStatus || "processing");
@@ -364,7 +302,6 @@ const OrderDetailsModal = ({ order, onClose, onStatusChange, statusOptions, getS
     setUpdating(true);
     try {
       await onStatusChange(order._id, localStatus);
-      // Status will be updated in parent component's state
     } catch (error) {
       console.error("Failed to update from modal:", error);
       setLocalStatus(order.orderStatus); // Reset on error
@@ -685,7 +622,6 @@ const AdminOrdersPage = () => {
       }
     } catch (error) {
       console.error("Error fetching customers:", error);
-      // Don't set error state here as it would override orders error
     }
   };
 
@@ -752,7 +688,6 @@ const AdminOrdersPage = () => {
     } catch (error) {
       console.error("Error updating order status:", error);
       
-      // Detailed error logging for easier debugging
       if (error.response) {
         console.error("Error response data:", error.response.data);
         console.error("Error response status:", error.response.status);
@@ -894,20 +829,45 @@ const AdminOrdersPage = () => {
   // Render loading state
   if (loading) {
     return (
-      <>
-        <Navbar />
-        <div className="flex items-center justify-center h-screen bg-white">
-          <div className="text-center">
-            <div className="w-16 h-16 mx-auto mb-4 relative">
-              <div className="absolute inset-0 rounded-full border-t-4 border-b-4 border-indigo-500 animate-spin"></div>
-              <div className="absolute inset-2 rounded-full border-t-4 border-b-4 border-purple-500 animate-spin animation-delay-150"></div>
-              <div className="absolute inset-4 rounded-full border-t-4 border-b-4 border-blue-500 animate-spin animation-delay-300"></div>
-            </div>
-            <p className="text-gray-600">Loading order data...</p>
-          </div>
+  <>
+    <Navbar />
+    <div className="flex items-center justify-center h-screen bg-white">
+      <div className="text-center">
+        <div className="grid grid-cols-3 gap-2 mb-6">
+          {[...Array(9)].map((_, i) => (
+            <div
+              key={i}
+              className="w-4 h-4 rounded-full bg-teal-500 animate-pulse"
+              style={{
+                animationDelay: `${i * 0.1}s`,
+                background: i % 2 === 0 
+                  ? 'linear-gradient(to right, #0D9488, #38B2AC)' 
+                  : 'linear-gradient(to right, #B87333, #8B4513)',
+              }}
+            />
+          ))}
         </div>
-      </>
-    );
+        <p className="text-gray-600 text-sm font-medium">Loading order data...</p>
+      </div>
+
+      <style jsx>{`
+        .animate-pulse {
+          animation: pulse 1.5s infinite ease-in-out;
+        }
+        @keyframes pulse {
+          0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.3;
+            transform: scale(0.8);
+          }
+        }
+      `}</style>
+    </div>
+  </>
+);
   }
 
   // Render error state
@@ -979,147 +939,132 @@ const AdminOrdersPage = () => {
 
         {showAnalytics && <AnalyticsDashboard orders={orders} />}
 
-        <div className="bg-white shadow-lg rounded-lg overflow-hidden border border-gray-100">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gradient-to-r from-gray-50 to-indigo-50">
-                <tr>
-                  <th 
-                    className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-indigo-50 transition-colors"
-                    onClick={() => handleSort("orderReference")}
-                  >
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredOrders.length > 0 ? (
+            filteredOrders.map((order) => (
+              <div
+                key={order._id}
+                className="bg-white rounded-lg shadow-md p-4 border-l-4 border-teal-500 hover:shadow-lg transition-all duration-300"
+              >
+                <div className="flex justify-between items-start mb-3">
+                  <div>
                     <div className="flex items-center">
-                      Order ID
-                      {sortField === "orderReference" && (
-                        sortDirection === "asc" ? <FaSortUp className="ml-1 text-indigo-500" /> : <FaSortDown className="ml-1 text-indigo-500" />
-                      )}
-                    </div>
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Customer</th>
-                  <th 
-                    className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-indigo-50 transition-colors"
-                    onClick={() => handleSort("createdAt")}
-                  >
-                    <div className="flex items-center">
-                      Date
-                      {sortField === "createdAt" && (
-                        sortDirection === "asc" ? <FaSortUp className="ml-1 text-indigo-500" /> : <FaSortDown className="ml-1 text-indigo-500" />
-                      )}
-                    </div>
-                  </th>
-                  <th 
-                    className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-indigo-50 transition-colors"
-                    onClick={() => handleSort("totalPrice")}
-                  >
-                    <div className="flex items-center">
-                      Total
-                      {sortField === "totalPrice" && (
-                        sortDirection === "asc" ? <FaSortUp className="ml-1 text-indigo-500" /> : <FaSortDown className="ml-1 text-indigo-500" />
-                      )}
-                    </div>
-                  </th>
-                  <th 
-                    className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-indigo-50 transition-colors"
-                    onClick={() => handleSort("orderStatus")}
-                  >
-                    <div className="flex items-center">
-                      Status
-                      {sortField === "orderStatus" && (
-                        sortDirection === "asc" ? <FaSortUp className="ml-1 text-indigo-500" /> : <FaSortDown className="ml-1 text-indigo-500" />
-                      )}
-                    </div>
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredOrders.length > 0 ? (
-                  filteredOrders.map((order) => (
-                    <tr key={order._id} className="hover:bg-gradient-to-r hover:from-gray-50 hover:to-indigo-50/20 transition-colors">
-                      <td className="px-4 py-3 text-sm font-medium text-indigo-600">{order.orderReference}</td>
-                      <td className="px-4 py-3 text-sm text-gray-700">
-                        <div className="flex flex-col">
-                          <span>{order.userName}</span>
-                          <span className="text-xs text-gray-500">{order.userEmail}</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-700">{formatDate(order.createdAt)}</td>
-                      <td className="px-4 py-3 text-sm font-medium text-gray-900">₹{order.totalPrice.toFixed(2)}</td>
-                      <td className="px-4 py-3 text-sm">
-                        {editingOrder && editingOrder._id === order._id ? (
-                          <>
-                            {updatingStatus ? (
-                              <div className="flex items-center text-gray-700">
-                                <div className="animate-spin mr-2 h-4 w-4 border-2 border-indigo-500 border-t-transparent rounded-full"></div> Updating...
-                              </div>
-                            ) : (
-                              <select
-                                value={order.orderStatus}
-                                onChange={(e) =>
-                                  handleStatusChange(order._id, e.target.value)
-                                }
-                                disabled={updatingStatus}
-                                className="rounded border-gray-300 py-1 text-sm bg-white text-gray-900 focus:ring-indigo-500 focus:border-indigo-500"
-                              >
-                                {statusOptions.map((option) => (
-                                  <option key={option.value} value={option.value}>
-                                    {option.label}
-                                  </option>
-                                ))}
-                              </select>
-                            )}
-                          </>
-                        ) : (
-                          <span 
-                            className="px-2 py-1 rounded-full text-xs font-medium shadow-sm"
-                            style={{
-                              background: order.orderStatus === 'processing' ? 'linear-gradient(to right, #fde68a, #fcd34d)' :
-                                        order.orderStatus === 'shipped' ? 'linear-gradient(to right, #93c5fd, #60a5fa)' :
-                                        order.orderStatus === 'delivered' ? 'linear-gradient(to right, #a7f3d0, #6ee7b7)' :
-                                        'linear-gradient(to right, #fecaca, #f87171)',
-                              color: order.orderStatus === 'processing' ? '#92400e' :
-                                    order.orderStatus === 'shipped' ? '#1e3a8a' :
-                                    order.orderStatus === 'delivered' ? '#065f46' :
-                                    '#991b1b'
-                            }}
-                          >
-                            {order.orderStatus}
-                          </span>
+                      <span className="text-sm font-semibold text-teal-600 mr-2">Order #{order.orderReference}</span>
+                      <button
+                        onClick={() => handleSort("orderReference")}
+                        className="text-gray-400 hover:text-teal-600"
+                      >
+                        {sortField === "orderReference" && (
+                          sortDirection === "asc" ? <FaSortUp size={14} /> : <FaSortDown size={14} />
                         )}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-700">
-                        <div className="flex space-x-2">
-                          <button 
-                            onClick={() => handleViewOrderDetails(order)}
-                            className="p-1.5 rounded-full bg-blue-50 hover:bg-blue-100 transition-colors shadow-sm"
-                            title="View Details"
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">{formatDate(order.createdAt)}</p>
+                  </div>
+                  <div className="flex space-x-2">
+                    <button 
+                      onClick={() => handleViewOrderDetails(order)}
+                      className="p-1.5 rounded-full bg-teal-50 hover:bg-teal-100 transition-colors shadow-sm"
+                      title="View Details"
+                    >
+                      <FaEye className="text-teal-600" size={16} />
+                    </button>
+                    <button 
+                      onClick={() => setEditingOrder(order)}
+                      className="p-1.5 rounded-full bg-copper-50 hover:bg-copper-100 transition-colors shadow-sm"
+                      title="Edit Status"
+                    >
+                      <FaEdit className="text-copper-600" size={16} />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-gray-700">Customer:</span>
+                    <div className="text-right">
+                      <p className="text-sm text-gray-800">{order.userName}</p>
+                      <p className="text-xs text-gray-500">{order.userEmail}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-gray-700">Total:</span>
+                    <div className="flex items-center">
+                      <span className="text-sm font-semibold text-gray-900">₹{order.totalPrice.toFixed(2)}</span>
+                      <button
+                        onClick={() => handleSort("totalPrice")}
+                        className="ml-2 text-gray-400 hover:text-teal-600"
+                      >
+                        {sortField === "totalPrice" && (
+                          sortDirection === "asc" ? <FaSortUp size={14} /> : <FaSortDown size={14} />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-gray-700">Status:</span>
+                    {editingOrder && editingOrder._id === order._id ? (
+                      <div className="flex items-center">
+                        {updatingStatus ? (
+                          <div className="flex items-center text-gray-700">
+                            <div className="animate-spin mr-2 h-4 w-4 border-2 border-teal-500 border-t-transparent rounded-full"></div> Updating...
+                          </div>
+                        ) : (
+                          <select
+                            value={order.orderStatus}
+                            onChange={(e) => handleStatusChange(order._id, e.target.value)}
+                            disabled={updatingStatus}
+                            className="rounded border-gray-300 py-1 text-sm bg-white text-gray-900 focus:ring-teal-500 focus:border-teal-500"
                           >
-                            <FaEye className="text-blue-600" />
-                          </button>
-                          <button 
-                            onClick={() => setEditingOrder(order)}
-                            className="p-1.5 rounded-full bg-green-50 hover:bg-green-100 transition-colors shadow-sm"
-                            title="Edit Status"
-                          >
-                            <FaEdit className="text-green-600" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="6" className="px-4 py-8 text-center">
-                      <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-lg inline-block">
-                        <FaSearch className="text-2xl text-gray-400 mx-auto mb-2" />
-                        <p className="text-gray-500">No orders found matching your criteria</p>
+                            {statusOptions.map((option) => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+                        )}
                       </div>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                    ) : (
+                      <div className="flex items-center">
+                        <span 
+                          className="px-2 py-1 rounded-full text-xs font-medium shadow-sm"
+                          style={{
+                            background: order.orderStatus === 'processing' ? 'linear-gradient(to right, #fef3c7, #fcd34d)' :
+                                      order.orderStatus === 'shipped' ? 'linear-gradient(to right, #93c5fd, #60a5fa)' :
+                                      order.orderStatus === 'delivered' ? 'linear-gradient(to right, #a7f3d0, #6ee7b7)' :
+                                      'linear-gradient(to right, #fecaca, #f87171)',
+                            color: order.orderStatus === 'processing' ? '#92400e' :
+                                  order.orderStatus === 'shipped' ? '#1e3a8a' :
+                                  order.orderStatus === 'delivered' ? '#065f46' :
+                                  '#991b1b'
+                          }}
+                        >
+                          {order.orderStatus}
+                        </span>
+                        <button
+                          onClick={() => handleSort("orderStatus")}
+                          className="ml-2 text-gray-400 hover:text-teal-600"
+                        >
+                          {sortField === "orderStatus" && (
+                            sortDirection === "asc" ? <FaSortUp size={14} /> : <FaSortDown size={14} />
+                          )}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="col-span-full text-center py-8">
+              <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-lg inline-block">
+                <FaSearch className="text-2xl text-gray-400 mx-auto mb-2" />
+                <p className="text-gray-500">No orders found matching your criteria</p>
+              </div>
+            </div>
+          )}
         </div>
 
         {showOrderDetails && (
@@ -1133,6 +1078,27 @@ const AdminOrdersPage = () => {
             customers={customers}
           />
         )}
+
+        <style jsx>{`
+          .bg-teal-50 {
+            background-color: #E6FFFA;
+          }
+          .bg-copper-50 {
+            background-color: #FDF2E9;
+          }
+          .text-teal-600 {
+            color: #0D9488;
+          }
+          .text-copper-600 {
+            color: #B87333;
+          }
+          .bg-teal-100 {
+            background-color: #B2F5EA;
+          }
+          .bg-copper-100 {
+            background-color: #FBD38D;
+          }
+        `}</style>
       </div>
     </>
   );
